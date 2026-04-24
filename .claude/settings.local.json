@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -rn \"//.*\" \"D:\\\\UnityProject\\\\RogueLikeTemplate\\\\Assets\\\\@Library\\\\Script\\\\VFX\\\\VFXBuilder.cs\")",
+      "Bash(grep \"^\\\\s*//\")",
+      "Skill(update-config)",
+      "Bash(mkdir -p /tmp/xlsx_dump)",
+      "Bash(unzip -o \"Assets/@Project/Scripts/SpecData/Xlsx/Spec.xlsx\" -d /tmp/xlsx_dump)",
+      "Read(//tmp/xlsx_dump/xl/**)",
+      "Read(//d/UnityProject/ArenaSurvive/Assets/@Project/Scripts/**)",
+      "Read(//d/UnityProject/ArenaSurvive/**)",
+      "Bash(xargs grep *)",
+      "Bash(grep -E \"\\\\.cs$\")",
+      "Bash(python *)",
+      "Bash(node *)"
+    ]
+  }
+}

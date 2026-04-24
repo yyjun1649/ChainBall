@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git blame:*)",
+      "Bash(git ls-files:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet format:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Read(**)",
+      "Glob(**)",
+      "Grep(**)"
+    ],
+    "deny": [
+      "Read(./Library/**)",
+      "Read(./Temp/**)",
+      "Read(./obj/**)",
+      "Read(./Logs/**)",
+      "Read(./UserSettings/**)",
+      "Edit(./Library/**)",
+      "Edit(./Temp/**)",
+      "Edit(./obj/**)",
+      "Edit(./Logs/**)",
+      "Edit(./UserSettings/**)",
+      "Edit(**/*.meta)",
+      "Edit(**/*.unity)",
+      "Edit(**/*.prefab)",
+      "Edit(**/*.asset)",
+      "Edit(**/*.controller)",
+      "Edit(**/*.anim)",
+      "Edit(**/*.mat)",
+      "Edit(**/*.asmdef)",
+      "Edit(**/*.asmref)",
+      "Edit(./ProjectSettings/**)",
+      "Edit(./Packages/manifest.json)",
+      "Edit(./Packages/packages-lock.json)",
+      "Write(**/*.meta)",
+      "Write(**/*.unity)",
+      "Write(**/*.prefab)",
+      "Write(**/*.asset)",
+      "Write(**/*.controller)",
+      "Write(**/*.anim)",
+      "Write(**/*.mat)",
+      "Bash(rm -rf:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)"
+    ],
+    "ask": [
+      "Edit(./.gitignore)",
+      "Edit(./.mcp.json)",
+      "Edit(./CLAUDE.md)",
+      "Edit(./ARCHITECTURE.md)",
+      "Edit(./.claude/settings.json)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)"
+    ]
+  },
+  "env": {
+    "CLAUDE_PROJECT_NAME": "RogueLikeTemplate",
+    "CLAUDE_PROJECT_KIND": "unity"
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
+  }
+}

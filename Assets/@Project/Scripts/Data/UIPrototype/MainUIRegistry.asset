@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f694605f9c36d934f9eaeebcfceb7750, type: 3}
+  m_Name: MainUIRegistry
+  m_EditorClassIdentifier: Assembly-CSharp::UIPrototyper.UIResourceRegistry
+  sprites:
+  - key: img.circle
+    sprite: {fileID: 21300000, guid: 2f61cebe4b5924393a343475d7743310, type: 3}
+    description: normal Circle
+    category: 2
+    nineSliceBorder: {x: 0, y: 0, z: 0, w: 0}
+  - key: img.Rounded
+    sprite: {fileID: 21300000, guid: 68ffd20999991484da3419d1cf3e9248, type: 3}
+    description: normal Rounded
+    category: 2
+    nineSliceBorder: {x: 0, y: 0, z: 0, w: 0}
+  - key: img.SemiRounded
+    sprite: {fileID: 21300000, guid: 06839a9e285134212915dda98b0834fa, type: 3}
+    description: normal SemiRounded
+    category: 2
+    nineSliceBorder: {x: 0, y: 0, z: 0, w: 0}
+  - key: img.Square
+    sprite: {fileID: 21300000, guid: 4dd70ec2220ae427b9b92a2d02dca9f0, type: 3}
+    description: normal Square
+    category: 2
+    nineSliceBorder: {x: 0, y: 0, z: 0, w: 0}
+  fonts:
+  - key: font.all
+    font: {fileID: 11400000, guid: 28e6f6657b9ef8147986dc56c99647a8, type: 2}
+    description: base font
+  colors:
+  - key: color.bg
+    color: {r: 0.10618596, g: 0.03604486, b: 0.16981131, a: 0}
+    description: Mian background
+  - key: color.primary
+    color: {r: 1, g: 1, b: 1, a: 0}
+    description: primary accent color
+  feelPresets:
+  - key: button.press
+    feelPrefab: {fileID: 5619907850549926129, guid: ab1d8faf5cc1e29439c00aa1a60dbbc7, type: 3}
+    description: Button press feedback
+  prefabs: []
