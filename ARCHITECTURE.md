@@ -30,7 +30,7 @@
 │   │   └──────────────┘ └──────────────┘                   │   │
 │   └──────────────────────────────────────────────────────┘   │
 │                                                              │
-│   ScriptableObject Data ──▶ consumed by Handlers / UI        │
+│   SpecData (xlsx → JSON + .g.cs) ──▶ SpecDataManager.Spec*   │
 │   Addressables         ──▶ async load (UniTask)              │
 │   UI: PopupBase + Handlers.UI.Show<TPopup>()                 │
 └─────────────────────────────────────────────────────────────┘
@@ -167,13 +167,101 @@ public async UniTask ChangeSceneAsync(
 
 ---
 
-## 3. Data Layer — ScriptableObject
+## 3. Data Layer — SpecData (xlsx → JSON + codegen)
 
-- All static / designer-tunable data lives in `Assets/@Project/Scripts/Data` as `ScriptableObject` types.
-- One `.cs` file per data **type**; `.asset` instances are created in the Editor (not by Claude).
-- Prefer typed collection SOs (e.g., `EnemyTable`) over loose `List<T>` on the manager.
-- Runtime mutation of SO instances is forbidden outside of dev tools — treat them as immutable.
-- Use `/new-so-data` to scaffold a new type.
+All static, designer-tunable gameplay data (projectiles, modifiers, triggers, effects, relics, weapons,
+characters, …) lives in **SpecData**, not in ScriptableObjects. The pipeline is owned by
+`Assets/@Library/Script/SpecData/` and is the single source of truth for tunable numbers.
+
+### Why SpecData, not ScriptableObject
+
+`*.asset` files are in the CLAUDE.md ⛔ prohibition list (GUID/FileID chains break under hand-edit).
+That means Claude cannot adjust a single number on a SO without risking corruption. SpecData
+sidesteps this entirely:
+
+- **xlsx is the design source** — designer edits in Excel.
+- **JSON is the runtime source** — generated, plain text, Claude can read/diff/compare freely.
+- **`.g.cs` is the type contract** — generated, plain text, Claude can read for field shape.
+- **Numbers are tunable by Claude** — by editing the source row (CSV or xlsx), then re-running
+  `Tools > SpecData > Rebuild All`. The user runs the rebuild step in the Editor.
+
+### Pipeline
+
+```
+Assets/@Project/Scripts/SpecData/Xlsx/Spec.xlsx        (designer source, version-controlled)
+                       │
+                       ▼  Tools > SpecData > Rebuild All
+                       │
+   ┌───────────────────┼───────────────────────────────────┐
+   ▼                                                       ▼
+Assets/@Project/Scripts/SpecData/Generated/Spec*.g.cs   Assets/@Project/Scripts/SpecData/Json/Spec*.json
+(compiled into Assembly-CSharp)                         (Addressable: "SpecData/Spec*")
+                                                                │
+                                                                ▼  [Runtime, BeforeSceneLoad]
+                                                       SpecDataManager.SpecXxx.Get(key)
+```
+
+Pipeline implementation: `Assets/@Library/Script/SpecData/` (`SpecTableImporter`, `CodeGenerator`,
+`JsonExporter`, `SchemaParser`, `RowParser`, `SpecDataValidator`, …). Settings asset:
+`Assets/@Project/Scripts/Data/SpecData/SpecDataSettings.asset`. The deeper pipeline guide is
+`Assets/@Library/Script/SpecData/README.md`.
+
+### Sheet conventions (xlsx)
+
+| Prefix     | Role                       | Output                                                                |
+|------------|----------------------------|-----------------------------------------------------------------------|
+| `#Menu`    | Designer index             | Ignored                                                               |
+| `#enum`    | Enum source                | `Generated/Enums.g.cs`                                                |
+| `#` (other)| Meta sheet                 | Ignored                                                               |
+| `T*`       | Data table                 | `Generated/T*.g.cs` (class `Spec*`) + `Json/T*.json`                   |
+
+Data table row layout (1-based):
+1. `#Menu` / Korean comment — ignored.
+2. **Field name** (column header). `#`-prefixed fields are dev-only and skipped in codegen.
+3. **Field type** — `int | long | float | double | bool | string`, arrays via `int[]` etc.
+   (cell-internal delimiter `/`), and enum references via `enum:eXxx` / `enum[]:eXxx`.
+4. … data rows. A row whose first cell is `IGNORE_ROW` is skipped.
+
+### Runtime contract
+
+```csharp
+using SpecData;
+
+if (SpecDataManager.SpecAttack.TryGet("magic_ball", out var atk))
+    Debug.Log($"{atk.id} dmg={atk.baseDamage}");
+
+foreach (var skill in SpecDataManager.SpecSkill.All) { /* … */ }
+```
+
+- Every spec class is `partial` — extend with helper methods (computed properties, predicates) in
+  `Assets/@Project/Scripts/SpecData/Partial/Spec*.cs`. **Do not edit `Generated/*.g.cs`.**
+- Tables are loaded once at `BeforeSceneLoad` via `SpecDataManager.LoadAll()` (Addressable key
+  `SpecData/Spec*`). Treat all loaded data as immutable at runtime.
+- New table workflow: add `T{Name}` sheet to xlsx → Rebuild All → add a `Table<TKey, Spec{Name}>`
+  property + one `LoadAddressable` line in `Partial/SpecDataManager.Tables.cs`.
+
+### When ScriptableObject is still allowed (narrow exception)
+
+ScriptableObject remains the right tool **only** for data that must hold direct Unity Object
+references (prefabs, sprites, materials) which JSON cannot represent. Current sanctioned uses:
+
+- `SpecDataSettings.asset` — pipeline configuration (paths, prefixes).
+- `FeelPresetTable.asset` — `string key → MMF_Player prefab` catalog (see §10).
+
+Any *new* ScriptableObject usage requires `/arch-update` first. **Numbers, enums, and pure data
+must go through SpecData.**
+
+### Hard rules
+
+- **No new ScriptableObject types for tunable numbers.** If you find yourself reaching for SO,
+  add a `T*` sheet to the xlsx instead.
+- **Do not edit `Generated/*.g.cs`.** Regenerate via Rebuild All.
+- **Do not hand-edit `*.json` in `Json/`.** They are regenerated from xlsx and will be overwritten.
+  Tune values at the xlsx source.
+- **Spec instances are immutable at runtime.** No mutation of fields after `LoadAll()` outside dev
+  tools.
+- **Designer-facing keys are explicit.** Each table's key column is documented in
+  `Docs/Specs/Schema/{spec}.md`.
 
 ---
 
@@ -329,11 +417,16 @@ Assets/
 │   ├── Scene/                # Unity scenes
 │   └── Scripts/
 │       ├── Common/           # Cross-feature utilities, extensions
-│       ├── Data/             # ScriptableObject types + generated asset folders
-│       ├── Define/           # enums, const, static defines
+│       ├── Data/             # SO-only catalogs (FeelPresetTable, SpecDataSettings, …)
+│       ├── Define/           # enums, const, static defines (non-Spec)
 │       ├── Game/             # Runtime gameplay code
+│       ├── SpecData/         # Spec pipeline outputs + extensions (see §3)
+│       │   ├── Xlsx/         #   designer source xlsx
+│       │   ├── Generated/    #   auto-generated *.g.cs (do not edit)
+│       │   ├── Json/         #   auto-generated *.json (do not hand-edit)
+│       │   └── Partial/      #   hand-written partial extensions
 │       └── UI/               # Gameplay popups (inherit PopupBase)
-├── @Library/                 # In-house reusable code (shader, util, script)
+├── @Library/                 # In-house reusable code (shader, util, script, SpecData pipeline)
 ├── @ThirdParty/              # External vendor drops
 ├── Plugins/                  # Native / binary plugins
 └── NuGet/                    # NuGetForUnity packages
@@ -413,11 +506,13 @@ public class FeelPresetTable : ScriptableObject
 - `FeelHandler` holds `[SerializeField] FeelPresetTable _presets;` and caches a
   `Dictionary<string, MMF_Player>` on `Initialize`.
 - Keys are namespaced: `fx/*`, `ui/*`, `popup/*`.
-- **Architectural exception (scoped)**: §6 ("all gameplay assets load via Addressables") and
-  §7's "no `GameObject` serialized fields in gameplay code" rule do **not** apply to
-  `FeelPresetTable` / `FeelHandler`. This exception is limited to the Feel preset catalog
-  as system-layer designer-tunable data. Gameplay code must still route through
-  `Handlers.Resource` and `Handlers.Pool`.
+- **Architectural exception (scoped)**: §3 (SpecData-only for tunable data), §6 ("all gameplay
+  assets load via Addressables") and §7's "no `GameObject` serialized fields in gameplay code"
+  rule do **not** apply to `FeelPresetTable` / `FeelHandler`. The exception exists because the
+  preset catalog must hold direct `MMF_Player` prefab references which JSON cannot represent.
+  It is limited to the Feel preset catalog as system-layer designer-tunable asset references.
+  Gameplay code must still route numbers through SpecData and runtime asset loads through
+  `Handlers.Resource` / `Handlers.Pool`.
 
 ### Contract
 

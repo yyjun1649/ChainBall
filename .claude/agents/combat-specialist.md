@@ -69,7 +69,7 @@ Boundary cases: decompose. Example — "projectile that chills on hit" → shape
   - `combat-effect` — lifesteal subscribes to `OnAfterDealDamage` (Reactive). `OnAttach/OnDetach`.
   - `combat-stat` — the damage bonus is a `PercentAdd` on `eStatType.MeleeDamage`. Source = augment instance.
 - **"Projectiles pierce through enemies."**
-  - `combat-hit` — already auto-wired: `Projectile.OnSpawn` attaches `PenetrateBehavior(Snapshot.HitCount - 1)` when `HitCount >= 0`. Adjust `SpecProjectile.hitCount`.
+  - `combat-hit` — already auto-wired: `MovingHit.OnSpawn` attaches `PenetrateBehavior(Snapshot.HitCount - 1)` when `HitCount >= 0`. Adjust `SpecHitInstance.hitCount`.
 - **"Crit should work for skills too."**
   - Already does. `DamagePipeline.Stage_RollCritical` is attack-type agnostic. If a specific attack type must NOT crit, express via Effect or pre-confirmed `IsCritical = false` + `CritMultiplier = 0` from Snapshot (currently no suppression gate needed).
 - **"Enemy teleports away when hit."**

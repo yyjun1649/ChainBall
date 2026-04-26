@@ -69,7 +69,7 @@ Claude MUST NOT directly edit, create, or delete any of the following. If a chan
    - Access system Handlers exclusively via their static accessors: `Handlers.Resource`, `Handlers.UI`, `Handlers.Scene`, `Handlers.Event`, `Handlers.Sound`, `Handlers.Time`.
 2. **Add a new system Handler when a concern is genuinely cross-cutting** (spans scenes, shared by many features, has no natural feature owner). Use `/new-handler` — it adds the field, static accessor, and `GetComponentInChildren` line. Gameplay/feature code that belongs to a single system or scene stays in that system/scene; do **not** promote feature logic to a Handler just to expose it globally.
 3. **Do not cache Handler references in fields.** Avoid `private UIHandler _ui = Handlers.UI;`. Call `Handlers.Xxx.Method()` at the point of use — this preserves lifecycle safety across scene loads.
-4. **Data is defined as ScriptableObject** in `Assets/@Project/Scripts/Data`.
+4. **Tunable gameplay data goes through SpecData** (`Assets/@Project/Scripts/SpecData/`). xlsx → JSON + `Spec*.g.cs`, accessed at runtime via `SpecDataManager.Spec*`. ScriptableObject is reserved for asset-reference catalogs only (e.g. `FeelPresetTable`, `SpecDataSettings`). See `ARCHITECTURE.md` §3.
 5. **UI uses the `PopupBase` + `Handlers.UI`** pattern (see the `handler-ui-popup` skill). Every popup inherits `PopupBase` and is opened via `Handlers.UI.Show<TPopup>()`.
 
 ---
@@ -125,7 +125,7 @@ Before starting work:
 - [ ] Does the request touch prohibited files (`*.meta`, `*.unity`, `*.prefab`)?
 - [ ] Does it touch `ProjectSettings`, `manifest.json`, or `asmdef`? — ask first
 - [ ] New Handler? → use `/new-handler`
-- [ ] New data class? → use `/new-so-data`
+- [ ] New tunable data? → add `T*` sheet to `SpecData/Xlsx/Spec.xlsx` (not a new SO). See `Docs/Specs/`.
 - [ ] Design change? → run `/arch-update` first
 
 After finishing:

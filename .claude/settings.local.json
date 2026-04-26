@@ -12,7 +12,11 @@
       "Bash(xargs grep *)",
       "Bash(grep -E \"\\\\.cs$\")",
       "Bash(python *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(unzip -p SpellBreaker_GDD_v0.1.docx word/document.xml)",
+      "Read(//tmp/**)",
+      "Bash(py --version)",
+      "Bash(py *)"
     ]
   }
 }
