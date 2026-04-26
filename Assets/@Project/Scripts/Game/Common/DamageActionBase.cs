@@ -12,12 +12,11 @@ public abstract class DamageActionBase<TSpec> : PooledDisposable where TSpec : I
         _spec = spec;
         foreach (var effectId in _spec.effects)
         {
-            if (effectId < 0)
-            {
-                continue;
-            }
-            
-            _effects.Add(EffectFactory.Create(SpecEffect.GetDictionary()[effectId].SetParam(), effectId.ToString()));
+            if (effectId <= 0) continue;
+            if (!SpecDataManager.Instance.SpecEffect.TryGet(effectId, out var effSpec)) continue;
+
+            var eff = EffectFactory.Create(effSpec, effectId.ToString());
+            if (eff != null) _effects.Add(eff);
         }
     }
 

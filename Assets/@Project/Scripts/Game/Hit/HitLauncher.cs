@@ -22,7 +22,7 @@ public static class HitLauncher
         SpecHitInstance hitSpec = null;
         if (damageSpec != null && damageSpec.hitInstance != 0)
         {
-            SpecHitInstance.GetDictionary().TryGetValue(damageSpec.hitInstance, out hitSpec);
+            SpecDataManager.Instance.SpecHitInstance.TryGet(damageSpec.hitInstance, out hitSpec);
         }
 
         var snap = HitSnapshotBuilder.Build(attacker, damageSpec, hitSpec, origin, direction, target);
