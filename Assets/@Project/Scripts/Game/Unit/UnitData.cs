@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Library;
 using SpecData;
 
@@ -10,11 +11,24 @@ public class UnitData : PooledDisposable
 
     public SpecCharacter SpecCharacter { get; private set; }
 
+    // Optional per-domain metadata. Brick uses BrickMeta; Player / future units add their own.
+    // Keeps UnitData generic — no domain-specific fields leak into the base type.
+    private readonly Dictionary<Type, UnitDataModule> _modules = new();
+
+    public T GetModule<T>() where T : UnitDataModule
+        => _modules.TryGetValue(typeof(T), out var m) ? (T)m : null;
+
+    public void AddModule(UnitDataModule module)
+    {
+        if (module == null) return;
+        _modules[module.GetType()] = module;
+    }
+
     public void Initialize(string name)
     {
         unitName = name;
 
-        SpecCharacter ??= SpecCharacter.GetDictionary()[unitName];
+        SpecCharacter ??= SpecDataManager.Instance.SpecCharacter.Get(unitName);
         Stats ??= new TStatContainer<eStatType>();
         Effects ??= new UnitEffects();
 
@@ -24,21 +38,28 @@ public class UnitData : PooledDisposable
         CalculateStat();
     }
 
+    // Brick / Player paths don't have a SpecCharacter row. Caller is responsible for
+    // populating Stats afterward (e.g. BrickFactory adds Base_Health from cell notation).
+    public void InitializeBare(string name)
+    {
+        unitName = name;
+
+        Stats ??= new TStatContainer<eStatType>();
+        Effects ??= new UnitEffects();
+
+        Effects.Initialize(this, CalculateStat);
+    }
+
+    // TODO Phase 8 — ChainBall Player redesign.
+    // Old SpecCharacter dummy carried 11 stat fields (health, meleeDamage, AttackSpeed, …);
+    // new schema only exposes startHp. Other stats (damage etc.) are weapon-driven in ChainBall.
+    // Phase 8 decides: keep TStatContainer for Brick HP / Player HP only, or replace entirely.
     private void RegisterBaseStats()
     {
         var s = SpecCharacter;
         const string baseSource = "Base";
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_Health",         eModifierType.Flat, eStatType.Health,         s.health,         false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_MeleeDamage",    eModifierType.Flat, eStatType.MeleeDamage,    s.meleeDamage,    false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_MagicDamage",    eModifierType.Flat, eStatType.MagicDamage,    s.magicDamage,    false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_AttackSpeed",    eModifierType.Flat, eStatType.AttackSpeed,    s.AttackSpeed,    false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_MoveSpeed",      eModifierType.Flat, eStatType.MoveSpeed,      s.MoveSpeed,      false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_CriticalChance", eModifierType.Flat, eStatType.CriticalChance, s.CriticalChance, false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_CriticalDamage", eModifierType.Flat, eStatType.CriticalDamage, s.CriticalDamage, false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_LifeSteal",      eModifierType.Flat, eStatType.LifeSteal,      s.LifeSteal,      false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_Defense",        eModifierType.Flat, eStatType.Defense,        s.Defense,        false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_HealRating",     eModifierType.Flat, eStatType.HealRating,     s.HealRate,       false, baseSource));
-        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier("Base_Range",          eModifierType.Flat, eStatType.Range,          s.Range,          false, baseSource));
+        Stats.AddModifier(TStatModifier<eStatType>.MakeModifier(
+            "Base_Health", eModifierType.Flat, eStatType.Health, s.startHp, false, baseSource));
     }
 
     public void CalculateStat()
@@ -51,5 +72,6 @@ public class UnitData : PooledDisposable
         SpecCharacter = null;
         Effects?.Clear();
         Stats?.Initialize();
+        _modules.Clear();
     }
 }
