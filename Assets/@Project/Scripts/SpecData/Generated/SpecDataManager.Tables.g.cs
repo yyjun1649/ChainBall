@@ -7,15 +7,39 @@ namespace SpecData
     public partial class SpecDataManager
     {
         public Table<string, SpecLocalize> SpecLocalize { get; private set; }
+        public Table<int, SpecHitInstance> SpecHitInstance { get; private set; }
+        public Table<string, SpecModifier> SpecModifier { get; private set; }
+        public Table<string, SpecTrigger> SpecTrigger { get; private set; }
+        public Table<string, SpecWeapon> SpecWeapon { get; private set; }
+        public Table<int, SpecWave> SpecWave { get; private set; }
+        public Table<string, SpecRelic> SpecRelic { get; private set; }
+        public Table<int, SpecEffect> SpecEffect { get; private set; }
+        public Table<string, SpecCharacter> SpecCharacter { get; private set; }
 
         partial void LoadTables()
         {
             SpecLocalize = Table<string, SpecLocalize>.LoadAddressable("SpecData/SpecLocalize", x => x.id);
+            SpecHitInstance = Table<int, SpecHitInstance>.LoadAddressable("SpecData/SpecHitInstance", x => x.id);
+            SpecModifier = Table<string, SpecModifier>.LoadAddressable("SpecData/SpecModifier", x => x.id);
+            SpecTrigger = Table<string, SpecTrigger>.LoadAddressable("SpecData/SpecTrigger", x => x.id);
+            SpecWeapon = Table<string, SpecWeapon>.LoadAddressable("SpecData/SpecWeapon", x => x.id);
+            SpecWave = Table<int, SpecWave>.LoadAddressable("SpecData/SpecWave", x => x.id);
+            SpecRelic = Table<string, SpecRelic>.LoadAddressable("SpecData/SpecRelic", x => x.id);
+            SpecEffect = Table<int, SpecEffect>.LoadAddressable("SpecData/SpecEffect", x => x.id);
+            SpecCharacter = Table<string, SpecCharacter>.LoadAddressable("SpecData/SpecCharacter", x => x.id);
         }
 
         partial void UnloadTables()
         {
             SpecLocalize = null;
+            SpecHitInstance = null;
+            SpecModifier = null;
+            SpecTrigger = null;
+            SpecWeapon = null;
+            SpecWave = null;
+            SpecRelic = null;
+            SpecEffect = null;
+            SpecCharacter = null;
         }
     }
 }

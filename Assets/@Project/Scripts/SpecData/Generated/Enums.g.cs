@@ -8,4 +8,147 @@ namespace SpecData
         None = 0,
     }
 
+    public enum eHitInstanceKind : long
+    {
+        MOVING = 1,
+        INSTANT = 2,
+        AURA = 3,
+    }
+
+    public enum eProjectileMotion : long
+    {
+        STRAIGHT = 0,
+        REFLECT = 1,
+        HOMING = 2,
+        CURVE = 3,
+        STATIC = 4,
+        FALLING = 5,
+    }
+
+    public enum eRarity : long
+    {
+        COMMON = 1,
+        UNCOMMON = 2,
+        RARE = 3,
+    }
+
+    public enum eElement : long
+    {
+        NONE = 0,
+        FIRE = 1,
+        ICE = 2,
+        SHOCK = 3,
+    }
+
+    public enum eModifierBehavior : long
+    {
+        NONE = 0,
+        SPLIT = 1,
+        PIERCE_ON_HIT = 2,
+        CHAIN = 3,
+        CLONE_AT_FIRE = 4,
+        FREEZE_ROW = 5,
+    }
+
+    public enum eTriggerEvent : long
+    {
+        BRICK_HIT = 1,
+        BRICK_KILL = 2,
+        WALL_BOUNCE = 3,
+        PROJECTILE_DESPAWN = 4,
+        NTH_BRICK_HIT = 5,
+        ELEMENT_MATCH = 6,
+        LINE_CLEAR = 7,
+        DANGER_PROXIMITY = 8,
+        CONSECUTIVE_HIT = 9,
+        FULL_BOUNCE = 10,
+    }
+
+    public enum eEffectKind : long
+    {
+        DAMAGE_DIRECT = 1,
+        AOE_DAMAGE = 2,
+        LINE_DAMAGE = 3,
+        CHAIN_DAMAGE = 4,
+        STATUS_BURN = 5,
+        STATUS_FREEZE = 6,
+        HEAL = 7,
+        GOLD_GAIN = 8,
+        SPAWN_HIT_INSTANCE = 9,
+        EXTRA_CAST = 10,
+        OVERKILL_TRANSFER = 11,
+        HALF_HP_REMOVE = 12,
+        GRAVITY_PULL = 13,
+        BURN_DETONATE = 14,
+        EMPOWER_NEXT = 15,
+    }
+
+    public enum eRelicCategory : long
+    {
+        DAMAGE = 1,
+        BOUNCE = 2,
+        MULTI_SHOT = 3,
+        SURVIVAL = 4,
+        ECONOMY = 5,
+        UTILITY = 6,
+        SYNERGY = 7,
+    }
+
+    public enum eRelicHook : long
+    {
+        PASSIVE_GLOBAL = 1,
+        ON_HIT = 2,
+        ON_KILL = 3,
+        ON_BOUNCE = 4,
+        ON_BOUNCE_EXHAUSTED = 5,
+        ON_PROJECTILE_DESPAWN = 6,
+        ON_TURN_END = 7,
+        ON_BATTLE_END = 8,
+        ON_BATTLE_START = 9,
+        ON_DAMAGE_TAKEN = 10,
+        ON_FATAL = 11,
+        ON_BRICK_DESTROY = 12,
+        ON_SHOP_OPEN = 13,
+    }
+
+    public enum eRelicCondition : long
+    {
+        NONE = 0,
+        BRICK_HP_EQ = 1,
+        BRICK_HP_LT_PCT = 2,
+        WITHIN_DANGER_ROW = 3,
+        WALL_BOUNCE_LR = 4,
+        SAME_BRICK_HITS_GE = 5,
+        PLAYER_HP_LT_PCT = 6,
+        BRICKS_KILLED_THIS_CAST_GE = 7,
+        NO_DAMAGE_TAKEN_PREV_BATTLE = 8,
+        IN_ELITE_BATTLE = 9,
+    }
+
+    public enum eSlotKind : long
+    {
+        ANY = 0,
+        TRIGGER = 1,
+        PROJECTILE = 2,
+        MODIFIER = 3,
+        EFFECT = 4,
+    }
+
+    public enum eUnlockCondition : long
+    {
+        ALWAYS = 0,
+        FIRST_CLEAR = 1,
+        ELITE_KILLS_GE = 2,
+        BOSS_KILLS_GE = 3,
+        RUN_COUNT_GE = 4,
+    }
+
+    public enum eBossPattern : long
+    {
+        NONE = 0,
+        BOSS_01_OPENING = 101,
+        BOSS_01_TELEGRAPH = 102,
+        BOSS_01_RAGE = 103,
+    }
+
 }
