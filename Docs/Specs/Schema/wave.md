@@ -1,11 +1,11 @@
-# Schema — `TWave` (Spec class: `SpecWave`)
+# Schema — `SpecWave` (Spec class: `SpecWave`)
 
 > 웨이브 / 스테이지의 줄 생성 패턴. 매 `TurnPhase.ENEMY` 마다 1행 생성에 사용된다.
 > 한 웨이브는 *복수 행* 을 가지며, `lineIndex` 오름차순으로 enqueue.
 
-| Sheet | Key column          | Generated class                    | JSON                            |
-|-------|---------------------|------------------------------------|---------------------------------|
-| `TWave` | (`waveId`, `lineIndex`) 복합 — 실제로는 `id`(int) 또는 `string` 단일 키 | `SpecData.SpecWave` (`partial`) | `Json/TWave.json` |
+| Sheet      | Key column                                    | Generated class                    | JSON                       |
+|------------|-----------------------------------------------|------------------------------------|----------------------------|
+| `SpecWave` | (`waveId`, `lineIndex`) 복합 — 실제로는 `id`(int) 단일 키 | `SpecData.SpecWave` (`partial`) | `Json/SpecWave.json`       |
 
 > 단일 키 시트라 `id` 컬럼을 별도로 두고 `(waveId, lineIndex)` 는 데이터 컬럼으로 — 검색은
 > `SpecDataManager.SpecWave.All.Where(...)` 사용 (Phase 2 / Phase 9에서 헬퍼 partial 추가 권장).

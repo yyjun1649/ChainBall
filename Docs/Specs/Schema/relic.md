@@ -1,11 +1,11 @@
-# Schema — `TRelic` (Spec class: `SpecRelic`)
+# Schema — `SpecRelic` (Spec class: `SpecRelic`)
 
 > 유물(Relic)은 패시브 효과. 스펠 조합이 전술이라면, 유물은 전략으로서 런 전체에 영향.
 > Slay the Spire의 Relic과 동일한 역할.
 
-| Sheet | Key column | Generated class                    | JSON                              |
-|-------|------------|------------------------------------|-----------------------------------|
-| `TRelic` | `id` (string) | `SpecData.SpecRelic` (`partial`) | `Json/TRelic.json`                |
+| Sheet       | Key column    | Generated class                    | JSON                       |
+|-------------|---------------|------------------------------------|----------------------------|
+| `SpecRelic` | `id` (string) | `SpecData.SpecRelic` (`partial`)   | `Json/SpecRelic.json`      |
 
 ---
 
@@ -28,7 +28,7 @@
 | `extraCast`     | `int`            | ✅       | 턴당 시전 +N. 추가 탄약 = `+1`.                                          | `0`              |
 | `extraCastDamageDelta` | `int`     | ✅       | 추가 시전된 발사체에 적용되는 데미지 가산 (보통 음수). 추가 탄약 = `-1`.| `0`              |
 | `chance`        | `float`          | ✅       | 발동 확률 [0, 1]. 무한 반사 = `0.5`. `1.0` = 항상.                       | `1.0`            |
-| `triggerEffectId` | `string`       | ⭕       | 발동 시 적용할 Effect의 `id` (비교적 복잡한 효과 위임). 없으면 `""`.     | `eff_explosion`  |
+| `triggerEffectId` | `int`          | ⭕       | 발동 시 적용할 Effect의 `id` (비교적 복잡한 효과 위임). 없으면 `0`. (SpecEffect.id 가 int 라 동기) | `1001`           |
 | `usesPerRun`    | `int`            | ✅       | 런 당 사용 횟수 제한. 최후의 발악 = `1`. `0` = 무제한.                   | `0`              |
 | `synergyAxis`   | `string`         | ⭕       | 시너지 라벨. UI 분류용. 표 8.7 참조. 없으면 `""`.                        | `damage_bounce`  |
 | `vfxKey`        | `string`         | ⭕       | 획득 / 발동 VFX.                                                         | `vfx/relic/get`  |

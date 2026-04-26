@@ -1,11 +1,11 @@
-# Schema — `TModifier` (Spec class: `SpecModifier`)
+# Schema — `SpecModifier` (Spec class: `SpecModifier`)
 
 > Modifier는 **바로 앞의 Projectile** (또는 앞선 Modifier가 적용된 결과)을 변형한다.
 > 슬롯 내 순서가 의미를 가진다 — 평가 모델은 `Docs/Systems/Combat.md` §시전 시퀀스 평가.
 
-| Sheet | Key column | Generated class                       | JSON                                  |
-|-------|------------|---------------------------------------|---------------------------------------|
-| `TModifier` | `id` (string) | `SpecData.SpecModifier` (`partial`) | `Json/TModifier.json`                  |
+| Sheet          | Key column    | Generated class                        | JSON                       |
+|----------------|---------------|----------------------------------------|----------------------------|
+| `SpecModifier` | `id` (string) | `SpecData.SpecModifier` (`partial`)    | `Json/SpecModifier.json`   |
 
 ---
 

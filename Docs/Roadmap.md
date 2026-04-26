@@ -41,12 +41,12 @@ GDD에서 *추가로* 필요한 것:
 **목표**: 모든 도메인 spec 시트를 xlsx에 작성하고 codegen이 통과하는 상태.
 
 ### 산출물
-- [ ] `Spec.xlsx` 에 시트 추가:
-  - `THitInstance` (kind enum 컬럼 + ChainBall 도메인 필드)
-  - `TModifier`, `TTrigger`, `TEffect`, `TRelic`, `TWeapon`, `TCharacter`, `TWave`
-- [ ] `#enum` 시트 확장 — 12종: `eHitInstanceKind, eProjectileMotion, eRarity, eElement, eModifierBehavior, eTriggerEvent, eEffectKind, eRelicCategory, eRelicHook, eRelicCondition, eSlotKind, eUnlockCondition, eBossPattern`.
+- [ ] `Spec.xlsx` 에 시트 추가 (시트명 컨벤션: `Spec*`, 2026-04-26 결정):
+  - `SpecHitInstance` (kind enum 컬럼 + ChainBall 도메인 필드, v0.1은 `damageType/attackType` 제외 — Option A)
+  - `SpecModifier`, `SpecTrigger`, `SpecEffect`, `SpecRelic`, `SpecWeapon`, `SpecCharacter`, `SpecWave`
+- [x] `#enum` 시트 확장 — 13종: `eHitInstanceKind, eProjectileMotion, eRarity, eElement, eModifierBehavior, eTriggerEvent, eEffectKind, eRelicCategory, eRelicHook, eRelicCondition, eSlotKind, eUnlockCondition, eBossPattern` (2026-04-26 완료, `Docs/Specs/Schema/_enums.md` 권위 문서).
 - [ ] `Tools > SpecData > Rebuild All` 무에러 통과 — `Generated/SpecHitInstance.g.cs` 등이 schema 컬럼대로 생성됨.
-- [ ] `SpecDataManager.Tables.cs` 에 `Table<TKey, TValue>` 한 줄씩 와이어링 (8개 테이블).
+- [ ] `SpecDataManager.Tables.g.cs` 자동 와이어링 검증 (CodeGenerator.WriteManagerTables 가 8개 테이블 모두 프로퍼티 + LoadAddressable 생성).
 - [ ] `SpecLocalize` 에 모든 nameKey/descKey 등록.
 
 ### 검증

@@ -1,4 +1,4 @@
-# Schema — `THitInstance` (Spec class: `SpecHitInstance`)
+# Schema — `SpecHitInstance` (Spec class: `SpecHitInstance`)
 
 > 공격 인스턴스의 정의. **MovingHit (투사체) / InstantHit (근접·범위 즉발) / AuraHit (지속 영역)** 세 종류가
 > 한 테이블을 공유한다. `kind` 컬럼이 어느 코드 풀(MovingHit/InstantHit/AuraHit)에서 인스턴스를 꺼낼지 결정한다.
@@ -6,9 +6,9 @@
 > ChainBall의 **Weapon 슬롯 카테고리 "Projectile"** 은 `kind=MOVING` 인 SpecHitInstance 행만 받는다.
 > Effect의 `SPAWN_HIT_INSTANCE` (구 `SPAWN_PROJECTILE`)는 임의의 kind를 받을 수 있다.
 
-| Sheet | Key column | Generated class                        | JSON                              |
-|-------|------------|----------------------------------------|-----------------------------------|
-| `THitInstance` | `id` (int) | `SpecData.SpecHitInstance` (`partial`) | `Json/THitInstance.json`         |
+| Sheet             | Key column | Generated class                        | JSON                              |
+|-------------------|------------|----------------------------------------|-----------------------------------|
+| `SpecHitInstance` | `id` (int) | `SpecData.SpecHitInstance` (`partial`) | `Json/SpecHitInstance.json`       |
 
 ---
 
@@ -24,8 +24,6 @@
 | `motion`          | `enum:eProjectileMotion` | ✅ | `kind=MOVING` 일 때만 의미. 그 외엔 `STRAIGHT` (무시).                       | `REFLECT`     |
 | `baseDamage`      | `float`          | ✅       | 충돌당 데미지. `0` = 데미지 없음 (예: 바운스볼).                              | `1`           |
 | `basePercent`     | `float`          | ✅       | 데미지 배수 베이스. 보통 `1.0`.                                               | `1.0`         |
-| `damageType`      | `enum:eDamageType` | ✅     | 코드 IDamageSpec 호환. `MELEE / RANGED / MAGIC` 등. v0.1 기본값 `RANGED`.    | `RANGED`      |
-| `attackType`      | `enum:eAttackType` | ✅     | 코드 IDamageSpec 호환. `NORMAL / SKILL / DOT` 등.                            | `SKILL`       |
 | `effects`         | `int[]`          | ✅       | 충돌 시 적용할 SpecEffect.id 리스트. 배열 구분자 `/`. 비어있으면 `[]`.        | `1001/1002`   |
 | `range`           | `float`          | ✅       | 코드 IDamageSpec 호환. `kind=INSTANT/AURA` 일 때 Shape 반경, `MOVING` 일 때 0 가능. | `1.5`   |
 | `moveSpeed`       | `float`          | ✅       | `kind=MOVING` 시 비행 속도. 그 외 `0`.                                       | `12.0`        |
@@ -103,6 +101,22 @@
 - `SpecEffect.kind=SPAWN_HIT_INSTANCE` 가 임의 kind를 spawn (자세한 Effect 동작은 Schema/effect.md).
 - 시전 평가 흐름은 `Docs/Systems/Combat.md` §2.
 - 코드 측 인스턴스 풀 키 형식: `HitInstance_{id}` (`AddressFormat`, see `Game/Hit/HitInstance.cs`).
+
+---
+
+## v0.1 결정 — `damageType` / `attackType` 컬럼 제외 (Option A, 2026-04-26)
+
+`Define.cs` 의 기존 `eDamageType` (`Melee/Magic/Heal`) / `eAttackType` (`Normal`) 와 본 schema 상의
+대문자 스네이크 (`MELEE/RANGED/MAGIC`, `NORMAL/SKILL/DOT`) 가 충돌. v0.1 에서는 두 컬럼을 시트에서
+**제외** 하고, `SpecHitInstance → DamageInfo` 어댑터에서 다음 고정값을 사용한다:
+
+```csharp
+damageType = eDamageType.Magic;   // ChainBall 발사체는 v0.1 모두 마법 계열로 처리
+attackType = eAttackType.Normal;  // 코드 enum의 유일 값
+```
+
+향후 캐릭터 다양화 / DOT Effect 추가 시점에 두 enum을 `#enum` 시트로 이전하고 `Define.cs` enum
+정리(또는 alias) 후 본 schema에 두 컬럼을 다시 추가한다 — 그 때 별도 `/arch-update`.
 
 ---
 

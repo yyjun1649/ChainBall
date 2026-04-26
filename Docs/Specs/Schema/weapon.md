@@ -1,13 +1,13 @@
-# Schema — `TWeapon` (Spec class: `SpecWeapon`)
+# Schema — `SpecWeapon` (Spec class: `SpecWeapon`)
 
 > 무기는 캐릭터와 독립된 공용 장비. 슬롯 수와 시전 정책으로 차별화된다.
 > 슬롯에 어떤 스펠을 꽂는지는 런타임 빌드(저장 데이터)이며, 본 spec에는 **빈 무기 정의**만 들어간다.
 >
 > v0.1의 무기는 모두 **지팡이 형태**이지만, 식별자는 일반화된 `Weapon` 을 쓴다 (캐릭터 추가 시 다른 무기 카테고리 대비).
 
-| Sheet | Key column | Generated class                       | JSON                              |
-|-------|------------|---------------------------------------|-----------------------------------|
-| `TWeapon` | `id` (string) | `SpecData.SpecWeapon` (`partial`) | `Json/TWeapon.json`               |
+| Sheet        | Key column    | Generated class                       | JSON                       |
+|--------------|---------------|---------------------------------------|----------------------------|
+| `SpecWeapon` | `id` (string) | `SpecData.SpecWeapon` (`partial`)     | `Json/SpecWeapon.json`     |
 
 ---
 

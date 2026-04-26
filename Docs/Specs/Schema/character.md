@@ -1,10 +1,10 @@
-# Schema — `TCharacter` (Spec class: `SpecCharacter`)
+# Schema — `SpecCharacter` (Spec class: `SpecCharacter`)
 
 > 캐릭터는 등장 스펠 풀과 패시브를 결정한다. 지팡이는 공용 장비라 본 spec에 포함되지 않는다.
 
-| Sheet | Key column | Generated class                       | JSON                              |
-|-------|------------|---------------------------------------|-----------------------------------|
-| `TCharacter` | `id` (string) | `SpecData.SpecCharacter` (`partial`) | `Json/TCharacter.json`         |
+| Sheet           | Key column    | Generated class                          | JSON                        |
+|-----------------|---------------|------------------------------------------|-----------------------------|
+| `SpecCharacter` | `id` (string) | `SpecData.SpecCharacter` (`partial`)     | `Json/SpecCharacter.json`   |
 
 > 주의: 이미 `Generated/SpecCharacter.g.cs` 가 존재한다 (현 더미). 본 schema는 ChainBall 도메인을 반영하는
 > 새 정의이며, 기존과의 정합화는 구현 단계에서 결정.

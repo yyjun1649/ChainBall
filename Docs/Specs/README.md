@@ -46,7 +46,12 @@ Deeper engine guide: [`@Library/Script/SpecData/README.md`](../../Assets/@Librar
 | `#Menu`    | Designer index             | Ignored                                                               |
 | `#enum`    | Enum source                | `Generated/Enums.g.cs`                                                |
 | `#` (other)| Meta sheet                 | Ignored                                                               |
-| `T*`       | Data table                 | `Generated/T*.g.cs` (class `Spec*`) + `Json/T*.json`                  |
+| `Spec*`    | Data table                 | `Generated/Spec*.g.cs` (class `Spec*`) + `Json/Spec*.json`            |
+
+> **컨벤션 메모 (2026-04-26 변경)**: 시트명 prefix를 기존 `T*` → `Spec*` 로 통일.
+> 클래스명 / 프로퍼티명 / JSON 파일명 / Addressable 키가 모두 `Spec*` 로 일치한다.
+> `SchemaParser` 가 시트명을 그대로 클래스명으로 쓰고, `CodeGenerator.PropName` 의 `T` 접두 제거 로직은
+> `Spec*` 시트에 무영향이라 추가 코드 변경 없이 동작한다.
 
 ### Data table row layout (1-based)
 
@@ -99,14 +104,13 @@ foreach (var skill in SpecDataManager.SpecSkill.All)
 ## 4. Adding a new table
 
 ```
-[ ] Add T{Name} sheet to Spec.xlsx (follow row layout above)
+[ ] Add Spec{Name} sheet to Spec.xlsx (follow row layout above)
 [ ] Define column types correctly in row 3 (use enum:eXxx for enums)
 [ ] (Editor) Tools > SpecData > Rebuild All
-[ ] Verify Generated/T{Name}.g.cs has expected fields
-[ ] Add Table<TKey, Spec{Name}> property + LoadAddressable line in
-    SpecData/Partial/SpecDataManager.Tables.cs
+[ ] Verify Generated/Spec{Name}.g.cs has expected fields
+[ ] SpecDataManager.Spec{Name} 프로퍼티가 자동 와이어링됨 (CodeGenerator.WriteManagerTables → SpecDataManager.Tables.g.cs)
 [ ] Add Schema/{name}.md describing columns and allowed values
-[ ] (Optional) Add SpecData/Partial/Spec{Name}.cs for helper methods
+[ ] (Optional) Add SpecData/Partial/Spec{Name}.cs for helper methods (computed properties, predicates)
 ```
 
 ---
@@ -115,25 +119,25 @@ foreach (var skill in SpecDataManager.SpecSkill.All)
 
 ChainBall은 코드의 6-레이어 컨트랙트(`UnitCombatDesign.md`) 위에 GDD 도메인을 *얹는다*. 다음이 권위.
 
-| Table          | Schema doc                                       | Key column   | Purpose                                                 | 코드 매핑 |
-|----------------|--------------------------------------------------|--------------|---------------------------------------------------------|-----------|
-| `THitInstance` | [`Schema/hit_instance.md`](Schema/hit_instance.md) | `id` (int)    | 공격 인스턴스 (MOVING / INSTANT / AURA 통합)             | `SpecHitInstance` (코드 더미를 본 schema로 확장) |
-| `TModifier`    | [`Schema/modifier.md`](Schema/modifier.md)       | `id` (string) | 발사체 변형 — 가속, 분열, 관통, …                          | HitSnapshot 패치 + `IHitBehavior` 부착 |
-| `TTrigger`     | [`Schema/trigger.md`](Schema/trigger.md)         | `id` (string) | 발동 조건 — 온히트, N번째 충돌, 라인 클리어, …             | `HitInstance.OnHit / OnDespawn / OnTickFrame` 구독 |
-| `TEffect`      | [`Schema/effect.md`](Schema/effect.md)           | `id` (int)    | 효과 — 폭발, 화상, 연쇄 번개, …                           | `SpecEffect` + `IEffect` + `EffectFactory` (확장) |
-| `TRelic`       | [`Schema/relic.md`](Schema/relic.md)             | `id` (string) | 유물 — 철갑탄 장전, 처형자, 탄약 공장, …                   | `IEffect` 묶음 (Augment 패턴, UnitCombatDesign §5.4) |
-| `TWeapon`      | [`Schema/weapon.md`](Schema/weapon.md)           | `id` (string) | 무기 — 슬롯 수, 시전 정책                                  | (신규) `Weapon` 런타임 + `SpellSequence` 평가기 |
-| `TCharacter`   | [`Schema/character.md`](Schema/character.md)     | `id` (string) | 캐릭터 — 패시브, 전용 스펠 풀                              | `SpecCharacter` (확장) |
-| `TWave`        | [`Schema/wave.md`](Schema/wave.md)               | `id` (int)    | 웨이브 줄 생성 패턴 (보스 패턴 enum 분기 포함)              | (신규) `SpecWave` + `BrickPatternParser` + `BossPatternRunner` |
+| Sheet            | Schema doc                                         | Key column    | Purpose                                                  | 코드 매핑 |
+|------------------|----------------------------------------------------|---------------|----------------------------------------------------------|-----------|
+| `SpecHitInstance`| [`Schema/hit_instance.md`](Schema/hit_instance.md) | `id` (int)    | 공격 인스턴스 (MOVING / INSTANT / AURA 통합)             | `SpecHitInstance` (코드 더미를 본 schema로 확장) |
+| `SpecModifier`   | [`Schema/modifier.md`](Schema/modifier.md)         | `id` (string) | 발사체 변형 — 가속, 분열, 관통, …                          | HitSnapshot 패치 + `IHitBehavior` 부착 |
+| `SpecTrigger`    | [`Schema/trigger.md`](Schema/trigger.md)           | `id` (string) | 발동 조건 — 온히트, N번째 충돌, 라인 클리어, …             | `HitInstance.OnHit / OnDespawn / OnTickFrame` 구독 |
+| `SpecEffect`     | [`Schema/effect.md`](Schema/effect.md)             | `id` (int)    | 효과 — 폭발, 화상, 연쇄 번개, …                           | `SpecEffect` + `IEffect` + `EffectFactory` (확장) |
+| `SpecRelic`      | [`Schema/relic.md`](Schema/relic.md)               | `id` (string) | 유물 — 철갑탄 장전, 처형자, 탄약 공장, …                   | `IEffect` 묶음 (Augment 패턴, UnitCombatDesign §5.4) |
+| `SpecWeapon`     | [`Schema/weapon.md`](Schema/weapon.md)             | `id` (string) | 무기 — 슬롯 수, 시전 정책                                  | (신규) `Weapon` 런타임 + `SpellSequence` 평가기 |
+| `SpecCharacter`  | [`Schema/character.md`](Schema/character.md)       | `id` (string) | 캐릭터 — 패시브, 전용 스펠 풀                              | `SpecCharacter` (확장) |
+| `SpecWave`       | [`Schema/wave.md`](Schema/wave.md)                 | `id` (int)    | 웨이브 줄 생성 패턴 (보스 패턴 enum 분기 포함)              | (신규) `SpecWave` + `BrickPatternParser` + `BossPatternRunner` |
 
 ### 코드 spec과의 정합화 결정 (확정)
 
 | 코드 spec        | 결정                                                                                       |
 |------------------|--------------------------------------------------------------------------------------------|
-| `SpecHitInstance`| **확장**. 본 `THitInstance` schema가 권위. 종류 enum(`kind`) 추가, ChainBall 도메인 필드 흡수. |
+| `SpecHitInstance`| **확장**. `SpecHitInstance` 시트 schema가 권위. 종류 enum(`kind`) 추가, ChainBall 도메인 필드 흡수. v0.1은 `damageType/attackType` 컬럼 제외 — 어댑터에서 `RANGED/SKILL` 고정 매핑 (option A). |
 | `SpecAttack`     | v0.1에서 ChainBall은 사용하지 않음 (캐릭터 자율 공격 모듈이 없으므로). 코드는 유지하되 표는 빈 채로. |
 | `SpecSkill`      | **유지**. *자율 시전* (캐릭터 패시브/자동 발화) 용도로 남김. Weapon 시전은 SpellSequence 사용. |
-| `SpecEffect`     | **확장**. 본 `TEffect` schema가 권위. 도메인 효과(폭발, 화상, 연쇄 번개 등)에 맞는 IEffect 구현체 추가. |
+| `SpecEffect`     | **확장**. `SpecEffect` 시트 schema가 권위. 도메인 효과(폭발, 화상, 연쇄 번개 등)에 맞는 IEffect 구현체 추가. |
 | `SpecCharacter`  | **확장**. ChainBall 도메인 필드(passiveId, exclusivePool*, unlockPhase 등) 추가.            |
 | `SpecLocalize`   | 그대로 사용.                                                                                |
 

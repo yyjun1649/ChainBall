@@ -1,11 +1,11 @@
-# Schema — `TTrigger` (Spec class: `SpecTrigger`)
+# Schema — `SpecTrigger` (Spec class: `SpecTrigger`)
 
 > Trigger는 조건 충족 시 **뒤에 배치된 스펠**(Effect 또는 추가 Projectile)을 발동시킨다.
 > 슬롯 시퀀스의 시작 부분에 위치하며, "어떤 이벤트가 일어날 때 효과가 발화하는가"를 정의한다.
 
-| Sheet | Key column | Generated class                      | JSON                                |
-|-------|------------|--------------------------------------|-------------------------------------|
-| `TTrigger` | `id` (string) | `SpecData.SpecTrigger` (`partial`) | `Json/TTrigger.json`                 |
+| Sheet         | Key column    | Generated class                      | JSON                       |
+|---------------|---------------|--------------------------------------|----------------------------|
+| `SpecTrigger` | `id` (string) | `SpecData.SpecTrigger` (`partial`)   | `Json/SpecTrigger.json`    |
 
 ---
 
@@ -17,16 +17,16 @@
 | `nameKey`        | `string`         | ✅       | 로컬라이즈.                                                                | `trig.on_hit.name` |
 | `descKey`        | `string`         | ✅       | 로컬라이즈.                                                                | `trig.on_hit.desc` |
 | `rarity`         | `enum:eRarity`   | ✅       | `COMMON / UNCOMMON / RARE`                                                 | `COMMON`        |
-| `event`          | `enum:eTriggerEvent` | ✅   | 발동 이벤트. 아래 enum 참조.                                               | `BRICK_HIT`     |
-| `nthCount`       | `int`            | ✅       | `event=NTH_BRICK_HIT` 일 때 N번째. 그 외에는 `0`.                          | `0`             |
-| `elementMatch`   | `enum:eElement`  | ✅       | `event=ELEMENT_MATCH` 일 때 매칭할 속성. `NONE` = 사용 안 함.              | `NONE`          |
-| `proximityRow`   | `int`            | ✅       | `event=DANGER_PROXIMITY` 일 때 위험 라인으로부터 N줄 이내. 그 외 `0`.      | `0`             |
+| `eventType`      | `enum:eTriggerEvent` | ✅   | 발동 이벤트. 아래 enum 참조. (컬럼명은 C# 예약어 `event` 회피)              | `BRICK_HIT`     |
+| `nthCount`       | `int`            | ✅       | `eventType=NTH_BRICK_HIT` 일 때 N번째. 그 외에는 `0`.                      | `0`             |
+| `elementMatch`   | `enum:eElement`  | ✅       | `eventType=ELEMENT_MATCH` 일 때 매칭할 속성. `NONE` = 사용 안 함.          | `NONE`          |
+| `proximityRow`   | `int`            | ✅       | `eventType=DANGER_PROXIMITY` 일 때 위험 라인으로부터 N줄 이내. 그 외 `0`.  | `0`             |
 | `cooldownTurn`   | `int`            | ✅       | 발동 후 N턴 동안 재발동 금지 (한 시퀀스 내 다발동 방지). 보통 `0`.         | `0`             |
 | `maxFiresPerCast`| `int`            | ✅       | 한 시전(turn)당 최대 발동 횟수. `0` = 무제한.                              | `0`             |
 
 ---
 
-## `eTriggerEvent` (enum)
+## `eTriggerEvent` (enum, 컬럼명 `eventType`)
 
 | Value              | Description                                                              |
 |--------------------|--------------------------------------------------------------------------|
@@ -52,7 +52,7 @@
 ```
 
 - 슬롯 시퀀스에 Trigger가 없으면 → **항상 발동** (시퀀스 종료 시점에 Effect들이 발화).
-- Trigger가 있으면 → Trigger의 `event` 가 만족된 시점에 **그 뒤 Effect들이 1회 발화**.
+- Trigger가 있으면 → Trigger의 `eventType` 이 만족된 시점에 **그 뒤 Effect들이 1회 발화**.
 - `cooldownTurn` / `maxFiresPerCast` 는 폭주 방지 가드 (예: BRICK_HIT 트리거가 한 번에 50발화하는 것 방지).
 - 평가 순서, 다중 트리거 처리, 발화 컨텍스트 (어느 위치, 어느 벽돌)는 `Docs/Systems/Combat.md` 참조.
 
@@ -62,8 +62,8 @@
 
 ```
 [ ] id 는 snake_case 고유키
-[ ] event 가 NTH_BRICK_HIT 면 nthCount 채울 것
-[ ] event 가 ELEMENT_MATCH 면 elementMatch 채울 것
-[ ] event 가 DANGER_PROXIMITY 면 proximityRow 채울 것
+[ ] eventType 이 NTH_BRICK_HIT 면 nthCount 채울 것
+[ ] eventType 이 ELEMENT_MATCH 면 elementMatch 채울 것
+[ ] eventType 이 DANGER_PROXIMITY 면 proximityRow 채울 것
 [ ] BRICK_HIT 같은 고빈도 트리거는 maxFiresPerCast 로 상한 걸기 검토
 ```

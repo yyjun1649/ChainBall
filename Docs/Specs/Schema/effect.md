@@ -1,11 +1,14 @@
-# Schema — `TEffect` (Spec class: `SpecEffect`)
+# Schema — `SpecEffect` (Spec class: `SpecEffect`)
 
 > Effect는 Trigger 발동 시, 또는 시퀀스 말단에서 실행되는 결과다.
 > "무엇이 일어나는가" — 데미지, 상태이상, 회복, 추가 발사체 생성 등.
 
-| Sheet | Key column | Generated class                     | JSON                                |
-|-------|------------|-------------------------------------|-------------------------------------|
-| `TEffect` | `id` (string) | `SpecData.SpecEffect` (`partial`) | `Json/TEffect.json`                  |
+| Sheet        | Key column | Generated class                     | JSON                       |
+|--------------|------------|-------------------------------------|----------------------------|
+| `SpecEffect` | `id` (int) | `SpecData.SpecEffect` (`partial`)   | `Json/SpecEffect.json`     |
+
+> **키 타입 (2026-04-26 정정)**: `int`. 이유 — `SpecHitInstance.effects` 가 `int[]` 로 SpecEffect를 참조하고,
+> 기존 코드 더미 `Generated/SpecEffect.g.cs` 도 `public int id;` 로 정의됨. 셋이 일치해야 함.
 
 > 주의: 이미 `Generated/SpecEffect.g.cs` 가 존재한다 (현 더미). 본 schema는 ChainBall 도메인을 반영하는
 > 새 정의이며, 기존 `SpecEffect` 와의 정합화는 구현 단계에서 결정한다 — 이 문서 단계에서는 도메인 형태에 집중.
@@ -16,7 +19,7 @@
 
 | Field            | Type             | Required | Description                                                                | Example      |
 |------------------|------------------|----------|----------------------------------------------------------------------------|--------------|
-| `id`             | `string`         | ✅       | 고유 키.                                                                   | `explosion`  |
+| `id`             | `int`            | ✅       | 고유 키.                                                                   | `1001`       |
 | `nameKey`        | `string`         | ✅       | 로컬라이즈.                                                                | `eff.explosion.name` |
 | `descKey`        | `string`         | ✅       | 로컬라이즈.                                                                | `eff.explosion.desc` |
 | `rarity`         | `enum:eRarity`   | ✅       | `COMMON / UNCOMMON / RARE`                                                 | `COMMON`     |
