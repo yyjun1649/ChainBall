@@ -34,6 +34,21 @@ namespace SpecData.EditorTools
 
         static readonly Regex IdentRegex = new(@"^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
 
+        // C# reserved keywords. Contextual keywords (var, dynamic, partial, where, …) are valid
+        // identifiers and intentionally excluded.
+        static readonly HashSet<string> CSharpReservedKeywords = new()
+        {
+            "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked",
+            "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else",
+            "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for",
+            "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock",
+            "long", "namespace", "new", "null", "object", "operator", "out", "override", "params",
+            "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed",
+            "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this",
+            "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort",
+            "using", "virtual", "void", "volatile", "while",
+        };
+
         public static TableSchema Parse(ExcelSheet sheet)
         {
             var schema = new TableSchema { TableName = sheet.Name };
@@ -48,6 +63,13 @@ namespace SpecData.EditorTools
                 {
                     UnityEngine.Debug.LogWarning(
                         $"[SpecData] {sheet.Name} col{c}: '{name}' is not a valid C# identifier, skipped.");
+                    continue;
+                }
+                if (CSharpReservedKeywords.Contains(name))
+                {
+                    UnityEngine.Debug.LogError(
+                        $"[SpecData] {sheet.Name} col{c}: '{name}' is a C# reserved keyword. " +
+                        $"Rename the column (e.g. 'event' → 'eventType', 'class' → 'classType').");
                     continue;
                 }
 

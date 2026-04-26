@@ -1,6 +1,7 @@
 // Assets/Editor/SpecData/ExcelBook.cs
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using ClosedXML.Excel;
 
 namespace SpecData.EditorTools
@@ -17,7 +18,9 @@ namespace SpecData.EditorTools
         public static ExcelBook Open(string path)
         {
             var book = new ExcelBook();
-            using var wb = new XLWorkbook(path);
+            // FileShare.ReadWrite: Excel이 파일을 연 상태(독점 잠금)에서도 읽을 수 있도록 공유 모드로 연다.
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var wb = new XLWorkbook(fs);
             foreach (var ws in wb.Worksheets)
                 book.Sheets[ws.Name] = ExcelSheet.From(ws);
             return book;

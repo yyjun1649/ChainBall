@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpecData.EditorTools.SpecDataSettings
   xlsxPath: Assets/@Project/Scripts/SpecData/Xlsx/Spec.xlsx
   codeGenDir: Assets/@Project/Scripts/SpecData/Generated
-  jsonOutDir: Assets/@Project/Scripts/SpecData/Resources
+  jsonOutDir: Assets/@Project/Scripts/SpecData/Json
   enumSheet: '#enum'
   namespaceName: SpecData
+  addressablePrefix: SpecData/
