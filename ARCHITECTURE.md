@@ -213,7 +213,7 @@ Pipeline implementation: `Assets/@Library/Script/SpecData/` (`SpecTableImporter`
 | `#Menu`    | Designer index             | Ignored                                                               |
 | `#enum`    | Enum source                | `Generated/Enums.g.cs`                                                |
 | `#` (other)| Meta sheet                 | Ignored                                                               |
-| `T*`       | Data table                 | `Generated/T*.g.cs` (class `Spec*`) + `Json/T*.json`                   |
+| `Spec*`    | Data table                 | `Generated/Spec*.g.cs` (class `Spec*`) + `Json/Spec*.json`             |
 
 Data table row layout (1-based):
 1. `#Menu` / Korean comment — ignored.
@@ -262,6 +262,39 @@ must go through SpecData.**
   tools.
 - **Designer-facing keys are explicit.** Each table's key column is documented in
   `Docs/Specs/Schema/{spec}.md`.
+
+---
+
+## 3.5 Unit Layer — ChainBall lean baseline
+
+ChainBall은 RogueLikeTemplate에서 출발했지만 **자율 행동 유닛 (자율 탐지/이동/공격 모듈) 을 사용하지 않는다**. Brick은 매 턴 강제로 1칸 하강하고, Player는 위치 고정이며, 보스 패턴조차 `TWave` 시퀀싱 + 코드 메서드 (`BossPatternRunner.BossXX.*`) 로 결정된다. 결과적으로 `UnitController` 는 데이터 호스트 + 데미지 진입점 + FSM 의 얇은 베이스이고, 자율 모듈은 모두 제거되었다.
+
+### `UnitController` 의 책임 (lean, 2026-04-26 결정)
+
+| 영역 | 멤버 |
+|---|---|
+| 데이터 | `UnitData _unitData` (Stats + Effects host) |
+| 식별 | `Version`, `IsAlive`, `MaxHp / CurrentHp` |
+| 충돌 | `EnemyLayer / MyLayer`, `Collider2D _collider`, `MappingHelperManager` 등록 |
+| 데미지 | `DealDamage()`, `ApplyDamageToHealth(ctx)`, `Death()` |
+| 이벤트 | `OnTakeDamage`, `OnDealDamage`, `OnDeath` (Relay 3개) |
+| FSM | `UnitFsmHandler _unitFsmHandler` (Idle/Death 외 추가 state는 보스/유닛 패턴별 자유 정의) |
+
+### 제거된 것 (RogueLikeTemplate 잔재)
+
+`Detect/`, `BulletHellController`, `UnitController.Move()`, `Heal()/TakeHeal()`, `Target` (자율 추적 대상), `AttackRange`, `OnActionChanged/OnMoveDirectionChanged/OnFlip`, `OnTakeHeal/OnHeal` Relay, `eStatType.MoveSpeed/HealRating` 의존. 모든 유닛은 강제 이동 + 슬롯 시전 모델을 따르므로 자율 탐지/이동/회복은 의미 없다.
+
+### FSM 사용 패턴 (보스/유닛 기믹)
+
+`eStateType` enum (`Idle/Move/Death/Attack`) 은 그대로 유지된다. 보스/엘리트 유닛이 페이즈/패턴별 state 를 정의해 `_unitFsmHandler.Change(eStateType.X)` 로 전환한다. 자율 행동이 아닌 **시나리오 분기 도구**로서 FSM을 쓴다.
+
+### 자율 행동 유닛이 다시 필요해지면
+
+중간 클래스 (`AutonomousUnitController : UnitController`) 를 도입해 Detect/Move/Action 이벤트를 그쪽에 추가한다. `UnitController` 베이스는 lean 상태를 유지한다. 이는 `/arch-update` 흐름 후 결정.
+
+### 회복 (Heal) 처리
+
+ChainBall v0.1 의 회복은 Player에 한정된 단순 `HP += amount`. `UnitController.Heal()` 같은 이벤트 채널은 불필요. Heal 효과 (`SpecEffect.kind=HEAL`) 는 Phase 6 에서 `HealEffect` 가 `Player.HP += spec.healAmount` 로 처리.
 
 ---
 

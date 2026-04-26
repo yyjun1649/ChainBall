@@ -46,7 +46,6 @@ public class UnitHPBar : PoolMonoBehaviour<UnitHPBar>
     private void RegisterHandler()
     {
         _unitController.OnTakeDamage.AddListener(OnTakeDamage);
-        _unitController.OnTakeHeal.AddListener(OnTakeHeal);
         _unitController.OnDeath.AddListener(OnDeath);
     }
 
@@ -54,16 +53,10 @@ public class UnitHPBar : PoolMonoBehaviour<UnitHPBar>
     {
         if (_unitController == null) return;
         _unitController.OnTakeDamage.RemoveListener(OnTakeDamage);
-        _unitController.OnTakeHeal.RemoveListener(OnTakeHeal);
         _unitController.OnDeath.RemoveListener(OnDeath);
     }
 
     private void OnTakeDamage(DamageInfo damageInfo, UnitController from)
-    {
-        _sliderHp.SetValue(_unitController.CurrentHp / _unitController.MaxHp);
-    }
-
-    private void OnTakeHeal(DamageInfo damageInfo, UnitController from)
     {
         _sliderHp.SetValue(_unitController.CurrentHp / _unitController.MaxHp);
     }
