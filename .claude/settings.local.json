@@ -19,7 +19,8 @@
       "Bash(py *)",
       "Bash(git add *)",
       "Bash(git rm *)",
-      "Bash(git -C D:/UnityProject/ChainBall status --short)"
+      "Bash(git -C D:/UnityProject/ChainBall status --short)",
+      "Bash(git commit *)"
     ]
   }
 }
