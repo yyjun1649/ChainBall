@@ -5,13 +5,10 @@ namespace Library
 {
     public abstract class BaseScene : MonoBehaviour
     {
-        private void Awake()
-        {
-            Handlers.Scene.RegisterScene(this);
-        }
-
         private void Start()
         {
+            Handlers.Scene.RegisterScene(this);
+            
             OnSceneLoaded();
         }
 

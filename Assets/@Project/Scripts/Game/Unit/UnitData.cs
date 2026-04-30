@@ -39,7 +39,7 @@ public class UnitData : PooledDisposable
     }
 
     // Brick / Player paths don't have a SpecCharacter row. Caller is responsible for
-    // populating Stats afterward (e.g. BrickFactory adds Base_Health from cell notation).
+    // populating Stats afterward (e.g. UnitSpawnHandler adds Base_Health from cell notation).
     public void InitializeBare(string name)
     {
         unitName = name;

@@ -29,8 +29,7 @@ public class StraightMovement : ProjectileMovement
         _direction = direction.normalized;
         _elapsed = 0f;
 
-        float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        SetRotationFromDirection(_direction);
     }
 
     public override void Tick(float deltaTime)

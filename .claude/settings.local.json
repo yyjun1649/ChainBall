@@ -16,7 +16,10 @@
       "Bash(unzip -p SpellBreaker_GDD_v0.1.docx word/document.xml)",
       "Read(//tmp/**)",
       "Bash(py --version)",
-      "Bash(py *)"
+      "Bash(py *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git -C D:/UnityProject/ChainBall status --short)"
     ]
   }
 }

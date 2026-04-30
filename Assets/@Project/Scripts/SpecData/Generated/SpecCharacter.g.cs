@@ -11,6 +11,8 @@ namespace SpecData
         public string id;
         public string nameKey;
         public string descKey;
+        public int controllerId;
+        public int viewId;
         public string passiveId;
         public string[] commonPool;
         public string[] exclusivePool0;

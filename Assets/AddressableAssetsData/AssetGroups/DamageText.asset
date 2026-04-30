@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: DamageText
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: DamageText
+  m_GUID: a89bbdf37da522a40a470e782d060e19
+  m_SerializeEntries:
+  - m_GUID: 45fafb99f75eab04a919d106ae7c19d3
+    m_Address: DamageText_1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PREFAB
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e44311d33089c6e4a8ebb662bb8c05d6
+    m_Address: DamageText_0
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PREFAB
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 4d1de3e11c5933241ae517885d15795e, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: c1657ca7367b0da4e8a0001dfb185938, type: 2}
+    - {fileID: 11400000, guid: bb4682ab81a4e1a42abb5ce19688b37d, type: 2}

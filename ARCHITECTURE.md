@@ -107,6 +107,68 @@ namespace Library
 
 ---
 
+## 2.6 Game-level Handlers (`GameHandler`)
+
+`Library.Handlers` 가 **프로젝트 시스템 레이어** 라면, `GameHandler` 는 **게임 씬 (전투 루프)
+의 매니저 레이어** 다. 두 패턴은 공존하며 역할이 다르다.
+
+| 측면 | `Library.Handlers` (시스템) | `GameHandler` (게임 씬) |
+|---|---|---|
+| 베이스 | `SingletonBehaviour<Handlers>` | `MonoBehaviour` (`GameHandler` abstract 베이스) |
+| 위치 | `Assets/@Library/Script/Handler/` | `Assets/@Project/Scripts/Game/Managers/` |
+| 부모 GameObject | `Handlers` 루트 (DontDestroyOnLoad) | `GameManager` 자식 (씬 한정) |
+| 생명주기 | 프로젝트 전역 (앱 시작 ~ 종료) | `GameScene` 한정 (씬 unload 시 소멸) |
+| 정적 접근 | `Handlers.Resource` / `Handlers.UI` / … | `GameManager.Field` / `GameManager.Phase` / `GameManager.Spawn` |
+| 책임 | 자산 로딩 / 씬 전환 / 사운드 / 입력 같은 **cross-cutting 인프라** | 그리드 / 페이즈 / 유닛 스폰 같은 **전투 루프 매니저** |
+| 추가 시 | `/new-handler` | `GameHandler` 상속 + `GameManager` 자식 부착 + `GameManager.cs` 에 정적 accessor 추가 |
+
+### `GameHandler` 베이스 계약
+
+```csharp
+public abstract class GameHandler : MonoBehaviour
+{
+    public virtual void Initialize()     { }
+    public virtual void LateInitialize() { }
+    public virtual void Clear()          { }
+    public virtual void StartGame()      { }
+}
+```
+
+`GameManager.Awake` 에서 `GetComponentsInChildren<GameHandler>()` 로 일괄 수집 후
+`Initialize → LateInitialize` 순서로 호출. `StartBattle` 시점에 `StartGame()` broadcast.
+
+### 결정 트리 — 어느 패턴인가
+
+새 `XxxHandler` 가 필요할 때:
+
+```
+cross-scene? (TitleScene 에서도 LobbyScene 에서도 같은 인스턴스 필요?)
+  ├─ YES → Library.Handlers (system layer). /new-handler.
+  └─ NO  → 전투 씬 한정?
+            ├─ YES → GameHandler (game layer). GameManager 자식.
+            └─ NO  → 단일 feature 컴포넌트. Handler로 만들지 말 것.
+```
+
+### 현재 등록된 game-level Handlers
+
+- `FieldHandler` — 8×15 그리드 상태, ShiftAllDown / AddRowFromPattern / brick death 정리.
+- `PhaseHandler` — 턴 페이즈 시퀀스 (UPKEEP → ENEMY → CAST → DAMAGE → END), 코루틴 기반.
+- `UnitSpawnHandler` — Brick / Boss / Character 스폰 (SpecEnemy / SpecCharacter 기반).
+
+신규 game-level Handler 추가 시 `GameManager.cs` 에 `GetComponentInChildren<XxxHandler>()`
++ 정적 accessor 한 줄 추가하면 끝.
+
+### 명명 주의
+
+두 패턴 모두 `XxxHandler` 를 쓰지만 같은 namespace 충돌은 없게:
+
+- system-layer 는 `namespace Library` 안.
+- game-layer 는 글로벌 namespace.
+
+PR 리뷰 시 "이건 어느 레이어 Handler 인가" 가 모호하면 위 결정 트리로 돌아간다.
+
+---
+
 ## 2.5 Scene Flow & Transition Loading
 
 ### Scene graph
@@ -368,41 +430,50 @@ of the `Handlers` root. It is not a standalone singleton.
 
 ### Contract
 
-- Every pooled type inherits `PoolMonoBehaviour<T>` (CRTP) and declares a virtual
-  `protected internal abstract string AddressFormat { get; }`. The format is a composite Addressable
+- Every pooled type inherits `PoolMonoBehaviour<T>` (CRTP) and declares its Addressable key
+  format with a class attribute: `[PoolAddress("bullet_{0}")]`. The format is a composite Addressable
   key with `{0}` substituted by the int id — e.g. `"bullet_{0}"` → id `5` loads `bullet_5`.
+  The attribute is `Inherited = true`, so a base class (e.g. `HitInstance<T>`) can declare it once
+  and concrete subclasses inherit it. `ObjectPoolBase<T>` reads it via reflection on first `Get`
+  and caches the result — no instance is ever spun up just to read the format.
 - Prefab lookup goes through `Handlers.Resource.GetPrefab(address)`. **No `GameObject` or
   `AssetReferenceGameObject` serialized fields** in gameplay code; everything routes through
   `Handlers.Resource`.
 - `Handlers.Pool.Get<T>(int id)` returns a live instance. `PoolHandler`:
   1. Resolves the pool for `T`, creating it if needed.
-  2. On pool miss, loads the prefab via `Handlers.Resource.GetPrefab(ZString.Format(AddressFormat, id))`
-     and instantiates one. (First-miss cost is sync; use `Prewarm` for hot assets.)
+  2. On pool miss, loads the prefab via `Handlers.Resource.GetPrefab(ZString.Format(format, id))`
+     where `format` comes from the `[PoolAddress]` attribute on `T`. (First-miss cost is sync;
+     use `Prewarm` for hot assets.)
   3. Sets `poolObjectId = id` and `SourcePool = <this pool>` on the instance, then calls `OnGet()`.
 - Each pooled instance carries a back-reference (`internal ObjectPoolBase<T> SourcePool`). Callers
   return instances via `obj.Release()` only — **no `Handlers.Pool.Release<T>(int, T)` overload**.
   This eliminates the risk of mismatched `(id, obj)` arguments.
+- **UI 풀**은 `[PoolCanvas(RenderMode.WorldSpace)]` (또는 `ScreenSpaceOverlay`) attribute로
+  표시한다. `ObjectPoolBase` 가 첫 instantiate 직전에 풀 root에 `Canvas` + `CanvasScaler` +
+  `GraphicRaycaster` 를 자동 부착하고, 모든 인스턴스가 그 Canvas 의 자식으로 spawn된다 —
+  prefab은 Canvas를 직접 갖지 않아도 됨. World Space 의 경우 풀 root scale 0.01,
+  `worldCamera = MainCamera.Camera`, `sortingLayerName = "VFX"` 가 디폴트.
 
 ### Rules
 
 - **No string literal Addressable keys** for pooled prefabs in gameplay code. The only place the
-  format lives is the derived type's `AddressFormat` override.
-- **`AddressFormat` must contain `{0}`.** The pool validates this on first `Get`; misconfiguration
-  raises `InvalidOperationException` immediately rather than silently collapsing all ids to one prefab.
+  format lives is the `[PoolAddress(...)]` attribute on the pool type (or its base).
+- **`[PoolAddress]` format must contain `{0}`.** The pool validates this on first `Get`; missing
+  attribute or missing `{0}` raises `InvalidOperationException` immediately rather than silently
+  collapsing all ids to one prefab.
 - **Do not cache `ObjectPoolBase<T>` or `PoolHandler` references.** Call `Handlers.Pool.GetObject<T>()`
   at the use site (same discipline as other Handlers).
 - **Designer-facing id stays int.** The meaning of a given id is documented on the pool type, not
   as a global enum. Collisions across types are impossible because pools are keyed by `Type`.
-- **Addressable asset keys must match the format.** Data entries for `Bullet` with `AddressFormat =
-  "bullet_{0}"` must register Addressables named `bullet_1`, `bullet_2`, …
+- **Addressable asset keys must match the format.** Data entries for `Bullet` with
+  `[PoolAddress("bullet_{0}")]` must register Addressables named `bullet_1`, `bullet_2`, …
 
 ### Minimal example
 
 ```csharp
+[PoolAddress("bullet_{0}")]
 public class Bullet : PoolMonoBehaviour<Bullet>
 {
-    protected internal override string AddressFormat => "bullet_{0}";
-
     public override void OnGet()
     {
         base.OnGet();
@@ -417,6 +488,20 @@ b.transform.position = firePoint;
 // Return:
 b.Release();   // no id, no manager reference
 ```
+
+### UI 풀 예 — DamageText
+
+```csharp
+[PoolAddress("DamageText_{0}")]
+[PoolCanvas(RenderMode.WorldSpace)]
+public class DamageText : PoolMonoBehaviour<DamageText>
+{
+    [SerializeField] private TextMeshProUGUI _text;
+    public void Initialize(DamageInfo info, Vector3 pos) { /* … */ }
+}
+```
+
+prefab은 root에 `TextMeshProUGUI` 자식만 두면 충분. 풀이 Canvas 라이프사이클을 책임진다.
 
 ### When NOT to pool
 
@@ -435,8 +520,8 @@ b.Release();   // no id, no manager reference
 
 ### Workflow
 
-1. New pooled type — inherit `PoolMonoBehaviour<T>`, override `AddressFormat`, override
-   `OnGet`/`OnRelease` as needed.
+1. New pooled type — inherit `PoolMonoBehaviour<T>`, decorate with `[PoolAddress("foo_{0}")]`,
+   override `OnGet`/`OnRelease` as needed.
 2. Register the matching Addressable keys for each `(type, id)` pair.
 3. Optionally `Handlers.Pool.Prewarm<T>(id, count)` at scene load for hot assets.
 

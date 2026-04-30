@@ -100,7 +100,7 @@
 - Weapon 슬롯에서 Projectile 카테고리는 `kind=MOVING` 만 허용.
 - `SpecEffect.kind=SPAWN_HIT_INSTANCE` 가 임의 kind를 spawn (자세한 Effect 동작은 Schema/effect.md).
 - 시전 평가 흐름은 `Docs/Systems/Combat.md` §2.
-- 코드 측 인스턴스 풀 키 형식: `HitInstance_{id}` (`AddressFormat`, see `Game/Hit/HitInstance.cs`).
+- 코드 측 인스턴스 풀 키 형식: `HitInstance_{id}` (`[PoolAddress("HitInstance_{0}")]` on `HitInstance<T>`, see `Game/Hit/HitInstance.cs`).
 
 ---
 

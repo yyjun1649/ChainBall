@@ -1,15 +1,22 @@
-﻿
-    using Library;
+using Library;
+using SpecData;
+using UnityEngine;
 
-    public class GameScene : BaseScene
+public class GameScene : BaseScene
+{
+    protected override async void OnSceneLoaded()
     {
-        protected override void OnSceneLoaded()
-        {
-            
-        }
+        await Handlers.Instance.Initialize();
 
-        protected override void OnSceneDestroy()
-        {
+        await SpecDataManager.Instance.LoadAllAsync();
 
-        }
+        var gm = GameManager.Instance;
+        gm.Initialize();
+        gm.StartBattle();
     }
+
+    protected override void OnSceneDestroy()
+    {
+
+    }
+}

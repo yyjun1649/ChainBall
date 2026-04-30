@@ -222,7 +222,8 @@ public class ChainBehavior : IHitBehavior
 ## Pooling — 현재 상태
 
 세 HitInstance 타입 모두 `HitInstance<T> : PoolMonoBehaviour<T>` 상속으로 **이미 통합된 풀링** 위에서
-동작한다. `AddressFormat = "HitInstance_{0}"` 로 `SpecHitInstance.id` 가 직접 Addressable 키.
+동작한다. `HitInstance<T>` 에 `[PoolAddress("HitInstance_{0}")]` 가 박혀 있어 `SpecHitInstance.id` 가
+직접 Addressable 키 (자식 `MovingHit / InstantHit / AuraHit` 가 attribute 상속).
 
 | 타입        | 풀 호출                                       | 비고 |
 |-------------|-----------------------------------------------|------|

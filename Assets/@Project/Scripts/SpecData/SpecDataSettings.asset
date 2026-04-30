@@ -17,4 +17,4 @@ MonoBehaviour:
   jsonOutDir: Assets/@Project/Scripts/SpecData/Json
   enumSheet: '#enum'
   namespaceName: SpecData
-  addressablePrefix: SpecData/
+  addressablePrefix:

@@ -10,4 +10,9 @@ public abstract class ProjectileMovement : MonoBehaviour
     }
 
     public abstract void Tick(float deltaTime);
+
+    protected void SetRotationFromDirection(Vector2 dir)
+    {
+        transform.rotation = Quaternion.Euler(0f, 0f, UtilCode.VectorToAngleSigned(dir));
+    }
 }

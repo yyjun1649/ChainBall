@@ -3,19 +3,19 @@
 // </auto-generated>
 namespace SpecData
 {
-    public enum eItem : long
+    public enum eItem : int
     {
         None = 0,
     }
 
-    public enum eHitInstanceKind : long
+    public enum eHitInstanceKind : int
     {
         MOVING = 1,
         INSTANT = 2,
         AURA = 3,
     }
 
-    public enum eProjectileMotion : long
+    public enum eProjectileMotion : int
     {
         STRAIGHT = 0,
         REFLECT = 1,
@@ -25,14 +25,14 @@ namespace SpecData
         FALLING = 5,
     }
 
-    public enum eRarity : long
+    public enum eRarity : int
     {
         COMMON = 1,
         UNCOMMON = 2,
         RARE = 3,
     }
 
-    public enum eElement : long
+    public enum eElement : int
     {
         NONE = 0,
         FIRE = 1,
@@ -40,7 +40,7 @@ namespace SpecData
         SHOCK = 3,
     }
 
-    public enum eModifierBehavior : long
+    public enum eModifierBehavior : int
     {
         NONE = 0,
         SPLIT = 1,
@@ -50,7 +50,7 @@ namespace SpecData
         FREEZE_ROW = 5,
     }
 
-    public enum eTriggerEvent : long
+    public enum eTriggerEvent : int
     {
         BRICK_HIT = 1,
         BRICK_KILL = 2,
@@ -64,7 +64,7 @@ namespace SpecData
         FULL_BOUNCE = 10,
     }
 
-    public enum eEffectKind : long
+    public enum eEffectKind : int
     {
         DAMAGE_DIRECT = 1,
         AOE_DAMAGE = 2,
@@ -83,7 +83,7 @@ namespace SpecData
         EMPOWER_NEXT = 15,
     }
 
-    public enum eRelicCategory : long
+    public enum eRelicCategory : int
     {
         DAMAGE = 1,
         BOUNCE = 2,
@@ -94,7 +94,7 @@ namespace SpecData
         SYNERGY = 7,
     }
 
-    public enum eRelicHook : long
+    public enum eRelicHook : int
     {
         PASSIVE_GLOBAL = 1,
         ON_HIT = 2,
@@ -111,7 +111,7 @@ namespace SpecData
         ON_SHOP_OPEN = 13,
     }
 
-    public enum eRelicCondition : long
+    public enum eRelicCondition : int
     {
         NONE = 0,
         BRICK_HP_EQ = 1,
@@ -125,7 +125,7 @@ namespace SpecData
         IN_ELITE_BATTLE = 9,
     }
 
-    public enum eSlotKind : long
+    public enum eSlotKind : int
     {
         ANY = 0,
         TRIGGER = 1,
@@ -134,7 +134,7 @@ namespace SpecData
         EFFECT = 4,
     }
 
-    public enum eUnlockCondition : long
+    public enum eUnlockCondition : int
     {
         ALWAYS = 0,
         FIRST_CLEAR = 1,
@@ -143,7 +143,7 @@ namespace SpecData
         RUN_COUNT_GE = 4,
     }
 
-    public enum eBossPattern : long
+    public enum eBossPattern : int
     {
         NONE = 0,
         BOSS_01_OPENING = 101,

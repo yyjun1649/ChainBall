@@ -1,11 +1,10 @@
 using Library;
 using UnityEngine;
 
+[PoolAddress("UnitHpBar_{0}")]
+[PoolCanvas(RenderMode.WorldSpace)]
 public class UnitHPBar : PoolMonoBehaviour<UnitHPBar>
 {
-    protected internal override string AddressFormat => "UnitHpBar";
-    
-    
     [SerializeField] private DynamicSlider _sliderHp;
 
     private UnitController _unitController;

@@ -3,10 +3,9 @@ using Library;
 using Sigtrap.Relays;
 using UnityEngine;
 
+[PoolAddress("UnitController_{0}")]
 public class UnitController : PoolMonoBehaviour<UnitController>
 {
-    protected internal override string AddressFormat => ZString.Format("UnitController_{0}", poolObjectId);
-
     [SerializeField] private UnitFsmHandler _unitFsmHandler;
     [SerializeField] private Collider2D _collider;
 
@@ -142,6 +141,7 @@ public class UnitController : PoolMonoBehaviour<UnitController>
     public override void OnRelease()
     {
         MappingHelperManager.Instance.Unit.Unregister(_collider);
+        Version++;
         base.OnRelease();
     }
 
@@ -149,20 +149,20 @@ public class UnitController : PoolMonoBehaviour<UnitController>
     {
         EnemyLayer = enemyLayer;
         MyLayer = myLayer;
-        gameObject.layer = myLayer;
+        gameObject.layer = MaskToLayerIndex(myLayer);
+    }
+
+    private static int MaskToLayerIndex(LayerMask mask)
+    {
+        int v = mask.value;
+        if (v == 0) return 0;
+        int idx = 0;
+        while ((v & 1) == 0) { v >>= 1; idx++; }
+        return idx;
     }
 
     private void SetCollider(bool isOn)
     {
-        if (isOn)
-        {
-            MappingHelperManager.Instance.Unit.Register(_collider, this);
-        }
-        else
-        {
-            MappingHelperManager.Instance.Unit.Unregister(_collider);
-        }
-
         _collider.enabled = isOn;
     }
 }

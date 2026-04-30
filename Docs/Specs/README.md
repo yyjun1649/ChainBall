@@ -127,7 +127,8 @@ ChainBall은 코드의 6-레이어 컨트랙트(`UnitCombatDesign.md`) 위에 GD
 | `SpecEffect`     | [`Schema/effect.md`](Schema/effect.md)             | `id` (int)    | 효과 — 폭발, 화상, 연쇄 번개, …                           | `SpecEffect` + `IEffect` + `EffectFactory` (확장) |
 | `SpecRelic`      | [`Schema/relic.md`](Schema/relic.md)               | `id` (string) | 유물 — 철갑탄 장전, 처형자, 탄약 공장, …                   | `IEffect` 묶음 (Augment 패턴, UnitCombatDesign §5.4) |
 | `SpecWeapon`     | [`Schema/weapon.md`](Schema/weapon.md)             | `id` (string) | 무기 — 슬롯 수, 시전 정책                                  | (신규) `Weapon` 런타임 + `SpellSequence` 평가기 |
-| `SpecCharacter`  | [`Schema/character.md`](Schema/character.md)       | `id` (string) | 캐릭터 — 패시브, 전용 스펠 풀                              | `SpecCharacter` (확장) |
+| `SpecCharacter`  | [`Schema/character.md`](Schema/character.md)       | `id` (string) | Player / playable 캐릭터 — 패시브, 전용 스펠 풀, controllerId/viewId | `SpecCharacter` (확장) |
+| `SpecEnemy`      | [`Schema/enemy.md`](Schema/enemy.md)               | `id` (string) | Brick / Boss — 웨이브 스폰 적 유닛 (controllerId/viewId/startHp) | (신규) `SpecEnemy` + `UnitSpawnHandler` |
 | `SpecWave`       | [`Schema/wave.md`](Schema/wave.md)                 | `id` (int)    | 웨이브 줄 생성 패턴 (보스 패턴 enum 분기 포함)              | (신규) `SpecWave` + `BrickPatternParser` + `BossPatternRunner` |
 
 ### 코드 spec과의 정합화 결정 (확정)

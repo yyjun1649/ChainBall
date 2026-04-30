@@ -1,0 +1,65 @@
+﻿[
+  {
+    "id": "brick_NORMAL",
+    "nameKey": "enemy.brick_normal.name",
+    "descKey": "enemy.brick_normal.desc",
+    "controllerId": 1,
+    "viewId": 1,
+    "startHp": 1,
+    "iconKey": ""
+  },
+  {
+    "id": "brick_shield_FIRE",
+    "nameKey": "enemy.brick_shield_fire.name",
+    "descKey": "enemy.brick_shield_fire.desc",
+    "controllerId": 1,
+    "viewId": 2,
+    "startHp": 1,
+    "iconKey": ""
+  },
+  {
+    "id": "brick_shield_ICE",
+    "nameKey": "enemy.brick_shield_ice.name",
+    "descKey": "enemy.brick_shield_ice.desc",
+    "controllerId": 1,
+    "viewId": 2,
+    "startHp": 1,
+    "iconKey": ""
+  },
+  {
+    "id": "brick_shield_SHOCK",
+    "nameKey": "enemy.brick_shield_shock.name",
+    "descKey": "enemy.brick_shield_shock.desc",
+    "controllerId": 1,
+    "viewId": 2,
+    "startHp": 1,
+    "iconKey": ""
+  },
+  {
+    "id": "brick_EXPLOSIVE",
+    "nameKey": "enemy.brick_explosive.name",
+    "descKey": "enemy.brick_explosive.desc",
+    "controllerId": 1,
+    "viewId": 3,
+    "startHp": 1,
+    "iconKey": ""
+  },
+  {
+    "id": "brick_SPAWNER",
+    "nameKey": "enemy.brick_spawner.name",
+    "descKey": "enemy.brick_spawner.desc",
+    "controllerId": 1,
+    "viewId": 4,
+    "startHp": 2,
+    "iconKey": ""
+  },
+  {
+    "id": "brick_REFLECTOR",
+    "nameKey": "enemy.brick_reflector.name",
+    "descKey": "enemy.brick_reflector.desc",
+    "controllerId": 1,
+    "viewId": 5,
+    "startHp": 99,
+    "iconKey": ""
+  }
+]

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using Library;
 using UnityEngine;
 
+[PoolAddress("HitInstance_{0}")]
 public abstract class HitInstance<T> : PoolMonoBehaviour<T>, IHitInstance
     where T : HitInstance<T>
 {
-    protected internal override string AddressFormat => "HitInstance_{0}";
-
     public HitSnapshot Snapshot { get; protected set; }
     public HitShape Shape { get; set; }
     public float Age { get; protected set; }

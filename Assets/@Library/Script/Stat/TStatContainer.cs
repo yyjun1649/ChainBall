@@ -21,6 +21,9 @@ public class TStatContainer<T>
 
             list.Clear();
         }
+        
+        _mods.Clear();
+        _cacheStats.Clear();
     }
 
     public void CalculateStat()

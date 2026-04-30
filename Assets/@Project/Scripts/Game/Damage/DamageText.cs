@@ -1,34 +1,28 @@
 ﻿
-using Cysharp.Text;
 using Library;
 using TMPro;
 using UnityEngine;
 
+[PoolAddress("DamageText_{0}")]
+[PoolCanvas(RenderMode.WorldSpace)]
 public class DamageText : PoolMonoBehaviour<DamageText>
 {
-    protected internal override string AddressFormat => ZString.Format("DamageText_{0}", poolObjectId);
-    
     [SerializeField] private TextMeshProUGUI _text;
-    [SerializeField] private Animator _animator;
 
     public void Initialize(DamageInfo damageInfo, Vector3 pos)
     {
         transform.localScale = Vector3.one * 0.01f;
-        
+
         SetColor(damageInfo.DamageType);
         SetSize(damageInfo.Value);
         SetText(damageInfo.Value);
 
+        pos.x += Random.Range(-0.5f, 0.5f);
+        
         transform.position = pos;
-        
+        transform.localRotation = Quaternion.Euler(0f, 0f, Random.Range(-30f, 30f));
+
         gameObject.SetActive(true);
-        
-        SetAnimation(damageInfo.CriticalType);
-    }
-    
-    public void SetAnimation(eCriticalType criticalType)
-    {
-        _animator.Play(criticalType.ToString());
     }
 
     public void SetColor(eDamageType damageType)
@@ -60,7 +54,6 @@ public class DamageText : PoolMonoBehaviour<DamageText>
     public void Reset()
     {
         _text = GetComponentInChildren<TextMeshProUGUI>();
-        _animator = GetComponent<Animator>();
     }
 
     public static void Show(DamageInfo damageInfo, Vector3 pos)

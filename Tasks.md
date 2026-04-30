@@ -3,7 +3,7 @@
 > Solo kanban. 우선순위 = 위→아래. **Active ≤ 3** 유지.
 > 큰 그림은 `Docs/Roadmap.md`. 이 파일은 그 중 **지금 작업 중인 슬라이스**.
 >
-> **Current Phase**: Phase 1 — Spec 데이터 기반 (1~2일, 디자이너 협업)
+> **Current Phase**: Phase 3 — SpellSequence + SnapshotPatch + TriggerWatcher (3~5일)
 
 ---
 
@@ -11,15 +11,20 @@
 
 <!-- 지금 손대고 있는 것. 시작하면 Backlog → Active 로 이동. -->
 
-- [ ] (2026-04-26~) Phase 2 — Editor 작업 + 씬 와이어링
-  - Brick prefab 만들기 (Brick + UnitFsmHandler + Collider2D + SpriteRenderer)
-  - Addressable key `UnitController_1` 등록
-  - GameScene 에 BrickField / TurnRunner / BrickFactory / Player 컴포넌트 배치 + 인스펙터 와이어링
-  - 디버그 패턴으로 ENEMY 단계에서 줄 생성 호출 (현재 stub)
+<!-- Phase 3 코드 3종 완료. 다음 Active 후보: Phase 3 통합 검증 (씬에서 SpellSequence.Use 호출 → 매직볼이 벽돌 깎이는지 확인) → Phase 4 Weapon 런타임 + 슬롯 평가. -->
+
+- [ ] Phase 3 통합 검증 — `CastPhase` (또는 디버그 컴포넌트) 에서 `SpellSequence.Use` 호출 → MovingHit 발사 + 벽돌 데미지 + 모디파이어/트리거 동작 (TriggerWatcher 는 `EffectFactory` Phase 6 미등록이므로 콘솔 경고만 확인)
 
 ---
 
 ## Backlog
+
+### Phase 3 — SpellSequence (Roadmap §Phase 3)
+
+<!-- 권장 PR 단위: 클래스 1개 + 단위 검증 디버그 코드 (Roadmap §작업 단위 권장) -->
+<!-- 진행 순서: SnapshotPatch (스냅샷 변형, 의존성 0) → TriggerWatcher (HitInstance event 구독) → SpellSequence (위 둘 + HitLauncher 통합). -->
+
+- [ ] **검증**: 씬에서 `SpellSequence` 직접 만들어 `Use` 호출 → 매직볼이 날아가서 벽돌이 깎임. Modifier (가속/강화탄) stat 반영, Trigger (온히트→폭발) 발화 — 단, `EffectFactory` Phase 6 미등록이므로 *발화 경고 로그* 만 확인.
 
 ### Phase 1 — Spec 데이터 기반
 
@@ -35,18 +40,6 @@
 - [ ] **검증**: `Tools > SpecData > Rebuild All` 무에러 + `SpecDataValidator` Console 빨간 로그 0
 - [ ] **검증**: 런타임에서 `SpecDataManager.SpecHitInstance.Get(...)` 호출 시 데이터 반환 확인
 
-### Phase 2 — Field & Brick & Turn skeleton (코드 완료, Editor 작업 남음)
-
-- [x] `Brick : UnitController` 얇은 파생 (`eBrickType`, `eElement`, `gridPos`)
-- [x] `BrickField` (8×15) — `AddRowFromPattern`, `ShiftAllDown`, `IsEmpty`, `GridToWorld`
-- [x] `BrickPatternParser` — `./N/N(2)/S(F)/E/P/R/B[id]` 표기법
-- [x] `TurnRunner` + `TurnPhase` (Idle/UPKEEP/CAST/ENEMY/DAMAGE/END), `OnTurnPhaseChanged`, UPKEEP 에서 `Effects.Tick(1f)`
-- [x] `Player` 임시 컴포넌트 (HP, OnHpChanged, OnDefeat)
-- [x] `BrickFactory` (`Handlers.Pool.Get<UnitController>` + Brick 캐스팅 + UnitData 조립)
-- [x] 디버그 입력: 스페이스바 = 다음 턴 (TurnRunner.Update)
-- [x] `UnitData.InitializeBare()` — SpecCharacter 없이도 동작 (Brick 용)
-- [x] **결정**: Brick prefab 1종 + 시각 토글
-
 ---
 
 ## Done
@@ -54,6 +47,19 @@
 <!-- 최근 완료. 누적되면 `Tasks/Archive/YYYY-MM.md`로 이주. -->
 
 ### 2026-04
+- [x] (2026-04-30) Phase 3 — `SnapshotPatch` 구현. `Assets/@Project/Scripts/Game/Spell/SnapshotPatch.cs` (Spell.md §3 / §7.1 권위표 그대로). `Apply(SpecModifier)` 누적 + `ApplyTo(HitSnapshot, SpecHitInstance)` 적용. `Mul`이 0이면 identity로 처리 (xlsx empty cell 방어). Editor verifier 추가 (`Tools > ChainBall > Spell > Verify SnapshotPatch`) — 강화탄+경량탄+데미지업 → damage=3 / bounce=7.
+- [x] (2026-04-30) Phase 3 — `SpellSequence` 통합. `Assets/@Project/Scripts/Game/Spell/SpellSequence.cs`. `Initialize` + `Use(from, origin, dir)`: SnapshotPatch 빌드 → multiShot (+ CLONE_AT_FIRE) cap 64 → spread 분배 → `Handlers.Pool.Get<MovingHit>` + `HitSnapshotBuilder.Build` + `patch.ApplyTo` + `Initialize` → bounce/pierce delta 반영 + PIERCE_ON_HIT → TriggerWatcher 부착. `Dispose` 시 watcher 일괄 정리. `HitInstanceDamageSpec` adapter (SpecHitInstance → IDamageSpec, damageType/attackType `default`). TriggerWatcher 는 OnDespawn 끝에서 self-Dispose 추가 — 풀 재활용 시 핸들러 leak 방지.
+- [x] (2026-04-30) Phase 3 — `TriggerWatcher` 구현. `Assets/@Project/Scripts/Game/Spell/TriggerWatcher.cs`. HitInstance.OnHit/OnDespawn 구독 → `eTriggerEvent` 매칭 (BRICK_HIT/BRICK_KILL/PROJECTILE_DESPAWN/NTH_BRICK_HIT/ELEMENT_MATCH/CONSECUTIVE_HIT 6종) → `EffectFactory.Create` + `host.Data.Effects.Add`. cooldownTurn / maxFiresPerCast 가드. WALL_BOUNCE/LINE_CLEAR/DANGER_PROXIMITY/FULL_BOUNCE 는 Phase 7 ChainBall event bus 도입 후.
+- [x] (2026-04-29) Phase 2 마무리 — Editor 작업 (Brick prefab + Addressable `UnitController_1` 등록 + GameScene 와이어링 + 디버그 줄 생성) 완료. 코드 측은 `TurnRunner` 단일 클래스 모델에서 **GameHandler 분리 모델**로 진화: `FieldHandler` / `PhaseHandler` / `UnitSpawnHandler` 3종 + `UpKeep/Cast/Damage/Enemy/End/Idle` Phase 코루틴 5종. `ARCHITECTURE.md §2.6` 신규 섹션으로 패턴 문서화.
+- [x] (2026-04-26) `Brick : UnitController` 얇은 파생 (`eBrickType`, `eElement`, `gridPos`)
+- [x] (2026-04-26) `BrickField` (8×15) — `AddRowFromPattern`, `ShiftAllDown`, `IsEmpty`, `GridToWorld`
+- [x] (2026-04-26) `BrickPatternParser` — `./N/N(2)/S(F)/E/P/R/B[id]` 표기법
+- [x] (2026-04-26) `TurnRunner` + `TurnPhase` (Idle/UPKEEP/CAST/ENEMY/DAMAGE/END), `OnTurnPhaseChanged`, UPKEEP 에서 `Effects.Tick(1f)`
+- [x] (2026-04-26) `Player` 임시 컴포넌트 (HP, OnHpChanged, OnDefeat)
+- [x] (2026-04-26) `BrickFactory` (`Handlers.Pool.Get<UnitController>` + Brick 캐스팅 + UnitData 조립)
+- [x] (2026-04-26) 디버그 입력: 스페이스바 = 다음 턴 (TurnRunner.Update)
+- [x] (2026-04-26) `UnitData.InitializeBare()` — SpecCharacter 없이도 동작 (Brick 용)
+- [x] (2026-04-26) **결정**: Brick prefab 1종 + 시각 토글
 - [x] (2026-04-26) `Tasks.md` 도입 — 마크다운 칸반 시작
 - [x] (2026-04-26) `Docs/Roadmap.md` 작성 — Phase 0~12 구현 순서 확정
 - [x] (2026-04-26) `Docs/Specs/Schema/_enums.md` — 13종 enum 권위 문서 (정수값 확정 + 디자이너 절차)

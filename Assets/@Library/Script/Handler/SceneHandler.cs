@@ -14,6 +14,11 @@ namespace Library
 
         private bool _isLoading = false;
 
+        private void Awake()
+        {
+            _loadingCanvas.gameObject.SetActive(false);
+        }
+
         public async UniTask ChangeSceneAsync(
             string sceneName,
             bool useLoading = false,
@@ -29,12 +34,9 @@ namespace Library
 
             try
             {
-                if (Handlers.Feel != null)
-                {
-                    Handlers.Feel.StopAll();
-                }
+                Handlers.Feel.StopAll();
 
-                if (useLoading && _loadingCanvas != null)
+                if (useLoading)
                 {
                     _loadingCanvas.gameObject.SetActive(true);
                 }
@@ -55,10 +57,8 @@ namespace Library
             }
             finally
             {
-                if (_loadingCanvas != null)
-                {
-                    _loadingCanvas.gameObject.SetActive(false);
-                }
+                _loadingCanvas.gameObject.SetActive(false);
+                
                 _isLoading = false;
             }
         }

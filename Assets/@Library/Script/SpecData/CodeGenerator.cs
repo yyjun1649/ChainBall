@@ -21,7 +21,7 @@ namespace SpecData.EditorTools
             sb.AppendLine("{");
             foreach (var def in defs)
             {
-                sb.Append("    public enum ").Append(def.Name).AppendLine(" : long");
+                sb.Append("    public enum ").Append(def.Name).AppendLine(" : int");
                 sb.AppendLine("    {");
                 foreach (var (key, val) in def.Entries)
                     sb.Append("        ").Append(key).Append(" = ").Append(val).AppendLine(",");

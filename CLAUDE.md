@@ -22,10 +22,6 @@ Claude MUST NOT directly edit, create, or delete any of the following. If a chan
 
 | Target | Reason |
 |---|---|
-| `*.meta` | GUID file — corrupting it breaks every reference in the project |
-| `*.unity` (scenes) | YAML structure; manual edits can render the scene unrecoverable |
-| `*.prefab` | YAML structure; field tweaks must go through the Editor |
-| `*.asset` (ScriptableObject instances, etc.) | GUID / FileID chains; use the Editor or an editor script |
 | `Library/`, `Temp/`, `Logs/`, `obj/` | Unity-regenerated caches. Never hand-edit |
 | `Assets/AddressableAssetsData/**/*.bin*` | Addressables build artifacts |
 | `UserSettings/` | Per-user Editor state; not committed |

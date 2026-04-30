@@ -40,9 +40,11 @@ public class DamageInfo : DisposeObject<DamageInfo>
         Final = value;
     }
 
+    // Pool key for DamageText. Critical / Normal / future variants get separate prefabs;
+    // DamageType is conveyed via SetColor on a shared prefab, not via key.
     public int GetId()
     {
-        return (int)DamageType * 1000 + (int)AttackType * 100 + (int)CriticalType;
+        return (int)CriticalType;
     }
 
     protected override void Reset()

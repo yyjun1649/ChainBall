@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Spec
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Spec
+  m_GUID: 20249a09c8de13a4da34e11b2976ca4c
+  m_SerializeEntries:
+  - m_GUID: 0d7c86e9bfe35f44eb9355df50ac7c3d
+    m_Address: SpecWave
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1aa438760f2045540bcec5322d77f198
+    m_Address: SpecTrigger
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 41812ee1d1e360f429535197c3dc77c4
+    m_Address: SpecEffect
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 557f5ab79d1192b438787bd75853b314
+    m_Address: SpecHitInstance
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89bf1c63dcc741c47a378a6d015906eb
+    m_Address: SpecLocalize
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9230d2159112c8a47906d7064e7e5e28
+    m_Address: SpecCharacter
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f8e168a9075613458717c7f9c4becab
+    m_Address: SpecModifier
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0a3948462a7f8d4eaf82e321662e094
+    m_Address: SpecWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db14aa65110f61d42aabe2c33b61df81
+    m_Address: SpecEnemy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ede4299d6aee596459855b3dcb70603e
+    m_Address: SpecRelic
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Spec
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 4d1de3e11c5933241ae517885d15795e, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: b0cfa2737e78aa647940934447c56825, type: 2}
+    - {fileID: 11400000, guid: 46765034c442cee4eb15695d4be4c9b2, type: 2}

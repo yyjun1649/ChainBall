@@ -11,13 +11,14 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/@Project/Scene/Title.unity
     guid: c3f34f2d73d3d0e40b080b78022df1c5
-  - enabled: 1
+  - enabled: 0
     path: Assets/@Project/Scene/Lobby.unity
     guid: 8abc13f0ae3306d44965ff169aff144c
   - enabled: 1
     path: Assets/@Project/Scene/Game.unity
     guid: 2aa27cce991d55543b88afb45d72d034
   m_configObjects:
-    com.unity.addressableassets: {fileID: 11400000, guid: e7252c26c17c65841a700168fb123cb4, type: 2}
+    addressableimportsettingslist: {fileID: 11400000, guid: 69b6b7ea0e1927a41ba550327a8345fa, type: 2}
+    com.unity.addressableassets: {fileID: 11400000, guid: 686801fd346edbf4c9c4b0941036122a, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

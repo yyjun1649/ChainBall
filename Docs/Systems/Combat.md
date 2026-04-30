@@ -319,7 +319,7 @@ HitInstance state (MovingHit, kind=MOVING) {
    `HitSnapshot.Speed` 에 단순 곱셈 패치 (Spell.md §7). 글로벌 슬로우모션은 v0.1 미사용 — 향후
    필요해지면 `Handlers.Time` 에 `SetTimeScale(float)` + `Handlers.Time.DeltaTime` 도입.
 2. ~~Projectile pooling 분리~~ → **해소**: 코드의 `MovingHit / InstantHit / AuraHit` 3개 풀이 이미
-   `PoolMonoBehaviour<T>` 의 separate pool로 동작. `AddressFormat = "HitInstance_{0}"` 가 SpecHitInstance.id
+   `PoolMonoBehaviour<T>` 의 separate pool로 동작. `[PoolAddress("HitInstance_{0}")]` 가 SpecHitInstance.id
    를 직접 키로 사용 (kind와 무관하게 같은 키 공간).
 3. ~~화상 / 동결 상태이상 데이터 모델~~ → **해소**: `IEffect` 구현체 (`BurnEffect`, `FreezeEffect`)
    로 표현하고 `brick.Data.Effects.Add(effect)` 적용. UnitCombatDesign §5.6 패턴 그대로 (Brick.md §1).

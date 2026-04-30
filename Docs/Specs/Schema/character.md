@@ -1,5 +1,6 @@
 # Schema — `SpecCharacter` (Spec class: `SpecCharacter`)
 
+> **Player / playable character** 정의 테이블. Brick / Boss 같은 적 유닛은 `SpecEnemy` 로 분리되어 있다 (`Schema/enemy.md` 참고).
 > 캐릭터는 등장 스펠 풀과 패시브를 결정한다. 지팡이는 공용 장비라 본 spec에 포함되지 않는다.
 
 | Sheet           | Key column    | Generated class                          | JSON                        |
@@ -15,9 +16,11 @@
 
 | Field              | Type             | Required | Description                                                           | Example          |
 |--------------------|------------------|----------|-----------------------------------------------------------------------|------------------|
-| `id`               | `string`         | ✅       | 고유 키.                                                              | `gunslinger`     |
+| `id`               | `string`         | ✅       | 고유 키 (Player 한정 — 적 유닛은 `SpecEnemy`).                       | `gunslinger`     |
 | `nameKey`          | `string`         | ✅       | 로컬라이즈.                                                           | `char.gunslinger.name` |
 | `descKey`          | `string`         | ✅       | 로컬라이즈.                                                           | `char.gunslinger.desc` |
+| `controllerId`     | `int`            | ✅       | `UnitController` 풀에서 `UnitController_{id}` Addressable을 로드. 모든 유닛 타입은 이 컨트롤러로 스폰된다. | `1`              |
+| `viewId`           | `int`            | ✅       | `UnitView` 풀에서 `UnitView_{id}` Addressable을 로드. `0` 이면 view 없음(헤드리스). | `1`              |
 | `passiveId`        | `string`         | ✅       | 캐릭터 패시브 효과 (`TRelic.id` 와 동일 형식, 또는 별도 테이블 — v0.1은 `TRelic` 재사용). | `passive_precision_shot` |
 | `commonPool`       | `string[]`       | ✅       | 공용 스펠 풀 사용 여부 + 제외 / 포함 리스트. 보통 `["*"]` (전체 사용).  | `*`              |
 | `exclusivePool0`   | `string[]`       | ✅       | Phase 0 (초기) 전용 스펠 `id` 리스트. `/` 구분.                       | `proj_double_shot/proj_cannonball/mod_amp/...` |

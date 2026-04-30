@@ -1,20 +1,19 @@
-﻿
-    using UnityEngine;
+using UnityEngine;
 
-    public static class UnitLayer
+public static class UnitLayer
+{
+    private static int _userLayer = -1;
+
+    public static int UserLayer
     {
-        private static LayerMask _userLayer;
-        
-        public static LayerMask UserLayer
+        get
         {
-            get
+            if (_userLayer < 0)
             {
-                if (_userLayer == 0)
-                {
-                    _userLayer = LayerMask.NameToLayer("User");
-                }
-
-                return _userLayer;
+                _userLayer = LayerMask.NameToLayer("User");
             }
+
+            return _userLayer;
         }
     }
+}

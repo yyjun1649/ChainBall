@@ -1,13 +1,15 @@
 using Cysharp.Text;
+using DG.Tweening;
 using Library;
+using MoreMountains.Feedbacks;
 using UnityEngine;
 
+[PoolAddress("UnitView_{0}")]
 public class UnitView : PoolMonoBehaviour<UnitView>
 {
-    protected internal override string AddressFormat => ZString.Format("UnitView_{0}", poolObjectId);
-
     [SerializeField] private Animator _animator;
     [SerializeField] private SpriteRenderer _model;
+    [SerializeField] private MMF_Player _mmf;
 
     private UnitController _unitController;
     public UnitController Controller => _unitController;
@@ -61,25 +63,29 @@ public class UnitView : PoolMonoBehaviour<UnitView>
         _unitController.OnDeath.RemoveListener(OnDeath);
     }
 
-    private void OnTakeDamage(DamageInfo damageInfo, UnitController from) { }
+    private void OnTakeDamage(DamageInfo damageInfo, UnitController from)
+    {
+        _mmf.PlayFeedbacks();
+    }
     private void OnDealDamage(DamageInfo damageInfo, UnitController to) { }
 
     private void OnDeath(bool force)
     {
         _followTarget = false;
 
-        if (force)
+        if (force || _animator == null)
         {
             UnregisterHandler();
             ReleaseSelf();
             return;
         }
 
-        if (_animator != null)
-        {
-            _animator.speed = 1f;
-            _animator.Play("Death");
-        }
+        _animator.speed = 1f;
+        _animator.Play("Death");
+        
+        //Test
+        
+        Invoke(nameof(ReleaseOnDeathAnimation),1f);
     }
 
     // Called from an Animation Event at the end of the Death clip.

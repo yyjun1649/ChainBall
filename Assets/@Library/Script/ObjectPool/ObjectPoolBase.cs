@@ -265,30 +265,47 @@ public class ObjectPoolBase<T> : IObjectPool where T : PoolMonoBehaviour<T>
     }
 
     private string _addressFormatCache;
+    private bool   _canvasChecked;
 
     private void EnsureAddressFormat()
     {
         if (_addressFormatCache != null) return;
 
-        var tempGO = new GameObject("__pool_format_reader__");
-        tempGO.SetActive(false);
-        tempGO.hideFlags = HideFlags.HideAndDontSave;
-        var prototype = tempGO.AddComponent<T>();
-        var format = prototype.AddressFormat;
-        GameObject.Destroy(tempGO);
+        var attr = (PoolAddressAttribute)System.Attribute.GetCustomAttribute(
+            typeof(T), typeof(PoolAddressAttribute), inherit: true);
 
+        if (attr == null)
+        {
+            throw new System.InvalidOperationException(
+                $"{typeof(T).Name} is missing [PoolAddress(\"...{{0}}...\")] attribute.");
+        }
+
+        var format = attr.Format;
         if (string.IsNullOrEmpty(format) || !format.Contains("{0}"))
         {
             throw new System.InvalidOperationException(
-                $"{typeof(T).Name}.AddressFormat must contain '{{0}}' placeholder. Got: '{format}'");
+                $"[PoolAddress] on {typeof(T).Name} must contain '{{0}}' placeholder. Got: '{format}'");
         }
 
         _addressFormatCache = format;
     }
 
+    private void EnsureCanvasIfNeeded()
+    {
+        if (_canvasChecked) return;
+        _canvasChecked = true;
+
+        var attr = (PoolCanvasAttribute)System.Attribute.GetCustomAttribute(
+            typeof(T), typeof(PoolCanvasAttribute), inherit: true);
+        if (attr == null) return;
+
+        AddCanvas(attr.Mode);
+    }
+
     protected virtual void InstantiateObject(int id)
     {
         EnsureAddressFormat();
+        EnsureCanvasIfNeeded();
 
         var prefab = Handlers.Resource.GetPrefab(ZString.Format(_addressFormatCache, id));
         var created = GameObject.Instantiate(prefab, _poolRoot.transform);

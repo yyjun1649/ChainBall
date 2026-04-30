@@ -37,4 +37,9 @@ public class Player : MonoBehaviour
         Hp = Mathf.Min(MaxHp, Hp + amount);
         OnHpChanged?.Invoke(amount, Hp);
     }
+
+    public void SetPosition(Vector3 pos)
+    {
+        transform.position = pos;
+    }
 }

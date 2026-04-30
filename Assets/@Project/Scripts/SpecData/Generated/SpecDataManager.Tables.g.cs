@@ -15,18 +15,20 @@ namespace SpecData
         public Table<string, SpecRelic> SpecRelic { get; private set; }
         public Table<int, SpecEffect> SpecEffect { get; private set; }
         public Table<string, SpecCharacter> SpecCharacter { get; private set; }
+        public Table<string, SpecEnemy> SpecEnemy { get; private set; }
 
         partial void LoadTables()
         {
-            SpecLocalize = Table<string, SpecLocalize>.LoadAddressable("SpecData/SpecLocalize", x => x.id);
-            SpecHitInstance = Table<int, SpecHitInstance>.LoadAddressable("SpecData/SpecHitInstance", x => x.id);
-            SpecModifier = Table<string, SpecModifier>.LoadAddressable("SpecData/SpecModifier", x => x.id);
-            SpecTrigger = Table<string, SpecTrigger>.LoadAddressable("SpecData/SpecTrigger", x => x.id);
-            SpecWeapon = Table<string, SpecWeapon>.LoadAddressable("SpecData/SpecWeapon", x => x.id);
-            SpecWave = Table<int, SpecWave>.LoadAddressable("SpecData/SpecWave", x => x.id);
-            SpecRelic = Table<string, SpecRelic>.LoadAddressable("SpecData/SpecRelic", x => x.id);
-            SpecEffect = Table<int, SpecEffect>.LoadAddressable("SpecData/SpecEffect", x => x.id);
-            SpecCharacter = Table<string, SpecCharacter>.LoadAddressable("SpecData/SpecCharacter", x => x.id);
+            SpecLocalize = Table<string, SpecLocalize>.LoadAddressable("SpecLocalize", x => x.id);
+            SpecHitInstance = Table<int, SpecHitInstance>.LoadAddressable("SpecHitInstance", x => x.id);
+            SpecModifier = Table<string, SpecModifier>.LoadAddressable("SpecModifier", x => x.id);
+            SpecTrigger = Table<string, SpecTrigger>.LoadAddressable("SpecTrigger", x => x.id);
+            SpecWeapon = Table<string, SpecWeapon>.LoadAddressable("SpecWeapon", x => x.id);
+            SpecWave = Table<int, SpecWave>.LoadAddressable("SpecWave", x => x.id);
+            SpecRelic = Table<string, SpecRelic>.LoadAddressable("SpecRelic", x => x.id);
+            SpecEffect = Table<int, SpecEffect>.LoadAddressable("SpecEffect", x => x.id);
+            SpecCharacter = Table<string, SpecCharacter>.LoadAddressable("SpecCharacter", x => x.id);
+            SpecEnemy = Table<string, SpecEnemy>.LoadAddressable("SpecEnemy", x => x.id);
         }
 
         partial void UnloadTables()
@@ -40,6 +42,7 @@ namespace SpecData
             SpecRelic = null;
             SpecEffect = null;
             SpecCharacter = null;
+            SpecEnemy = null;
         }
     }
 }
