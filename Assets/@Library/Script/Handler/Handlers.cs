@@ -54,6 +54,10 @@ namespace Library
 #else
         Application.runInBackground = false;
 #endif
+            
+            #if __SRD
+            SRDebug.Init();
+            #endif
 
             await _resourceHandler.InitializeAddressable(cancellationToken);
 

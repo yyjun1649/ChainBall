@@ -3,7 +3,7 @@
 > Solo kanban. 우선순위 = 위→아래. **Active ≤ 3** 유지.
 > 큰 그림은 `Docs/Roadmap.md`. 이 파일은 그 중 **지금 작업 중인 슬라이스**.
 >
-> **Current Phase**: Phase 3 — SpellSequence + SnapshotPatch + TriggerWatcher (3~5일)
+> **Current Phase**: Phase 4 — Weapon runtime + 슬롯 평가 (1~2일)
 
 ---
 
@@ -11,9 +11,9 @@
 
 <!-- 지금 손대고 있는 것. 시작하면 Backlog → Active 로 이동. -->
 
-<!-- Phase 3 코드 3종 완료. 다음 Active 후보: Phase 3 통합 검증 (씬에서 SpellSequence.Use 호출 → 매직볼이 벽돌 깎이는지 확인) → Phase 4 Weapon 런타임 + 슬롯 평가. -->
+<!-- Phase 3 + Phase 4 코드 5종 + SRDebugger 검증 패널 완료. 다음 후보: ① 실 GameScene 에서 SRDebugger 패널 동작 확인 (Addressable HitInstance_1 등록 여부 확인) → ② Phase 5 진입 (Modifier behavior 보강 — Chain/Orbit/Falling/Homing 실구현). -->
 
-- [ ] Phase 3 통합 검증 — `CastPhase` (또는 디버그 컴포넌트) 에서 `SpellSequence.Use` 호출 → MovingHit 발사 + 벽돌 데미지 + 모디파이어/트리거 동작 (TriggerWatcher 는 `EffectFactory` Phase 6 미등록이므로 콘솔 경고만 확인)
+- [ ] Phase 3+4 in-scene 검증 — GameScene 진입 → SRDebugger 트리거 → Spell 카테고리에서 CastDirect / CastViaWeapon 버튼 동작 확인. Addressable `HitInstance_1` 등록 여부 사전 점검.
 
 ---
 
@@ -47,6 +47,13 @@
 <!-- 최근 완료. 누적되면 `Tasks/Archive/YYYY-MM.md`로 이주. -->
 
 ### 2026-04
+- [x] (2026-04-30) Phase 3+4 zero-alloc 패스 — 사용자 컨벤션 강제: ZString / ZLinq / Pool. `SnapshotPatch` / `TriggerWatcher` / `SpellSequence` / `HitInstanceDamageSpec` 4종을 `Library.DisposeObject<T>` 로 전환 (HitSnapshot/DamageInfo 와 동일 패턴): 정적 `Get()` + `Dispose()` 사이클 + `protected override Reset()`. 모든 `$"..."` 인터폴레이션을 `ZString.Format/Concat` 로 교체 (Cysharp.Text). `SpellSequence.Reset` 은 `_activeWatchers.Clear()` 만 — watcher 들은 자기 HitInstance.OnDespawn 으로 자가-Dispose 하므로 sequence 풀링과 독립. ZLinq 미적용 (LINQ 미사용). ListPool 미적용 (TriggerWatcher 가 effects List 를 hit 수명 동안 보유 → aliasing 위험). Weapon 본체는 long-lived (per-Player 1개) 라 풀 불필요.
+- [x] (2026-04-30) Phase 3+4 코드리뷰 + 최적화 — 3-agent 병렬 리뷰 (reuse / quality / efficiency) 후 픽스: ① `HitSnapshotKeys.HitWidth/Element` 상수화 (SnapshotPatch + TriggerWatcher 의 stringly-typed `Extra` 키 제거) ② TriggerWatcher 에 `_effectIdPrefix` 캐시 — `FireEffects` 의 `$"trig_{id}_{spec.id}"` 매-발화 string alloc 제거 (HIGH) ③ SpellSequence.Use 가 `HitInstanceDamageSpec` 를 캐스트당 1회 hoist (이전: 발사체당 alloc) ④ `UtilCode.AngleToVector` 재사용 — Weapon.FireOnce / SROptions.Spell 의 inline `cos/sin/Deg2Rad` 중복 제거 ⑤ CONSECUTIVE_HIT vs NTH_BRICK_HIT 시맨틱 차이 주석 추가. 스킵: `_hasBounds` 캐시 (hot path 정당), `ApplyPierce` is-check (honest dispatch), List per-Cast (TriggerWatcher 수명 보유).
+- [x] (2026-04-30) ChainBall pierce 시맨틱 구현 (Phase 5 일부 선행). `BounceMovement` 에 `_pierceLeft` + `SetPierceCount(int)` 추가. `TickBounce` 가 `Physics2D.CircleCastNonAlloc` (8-buffer, 거리 정렬) 로 한 step 안의 모든 hit 처리 — 유닛 hit 시 pierce 활성이면 데미지 + decrement + 반사 스킵 + 다음 hit 으로 진행 (벽은 항상 반사). `PierceMark[4]` 무시 리스트 (3프레임 TTL) 로 brick 가 폭이 step 보다 클 때 같은 charge 재소비 방지. `SpellSequence.ApplyPierce` 가 BounceMovement 면 `SetPierceCount`, 아니면 기존 `PenetrateBehavior(N)` 폴백. `PIERCE_ON_HIT` 모디파이어도 동일 분기. SROptions 의 PierceCount/ModInfinitePierce 가 의도대로 "벽돌 통과" 로 작동.
+- [x] (2026-04-30) SROptions 벽 반사 지원 — `SpellSequence.Use` / `Weapon.Cast` 에 `Action<MovingHit> onFired` 옵셔널 콜백 추가 (스폰 직후 호출). SROptions 에 `BounceWalls` 토글 + `BoundsXMin/XMax/YMax/KillLine` 노브 (디폴트 CastPhase 값 매칭: -4/4/12/0). `MaybeAttachBounceContext` 가 콜백으로 전달되어 BounceMovement.AttachContext 호출 → 벽 반사 정상 동작.
+- [x] (2026-04-30) Bug — `BounceMovement` degenerate-bounds 가드. SROptions CastDirect 호출 시 공이 위로 가다 즉시 아래로 반사된 원인: `AttachContext` 미호출 → `_bounds=default(Rect)` → ceiling y=0 즉시 반사. `_hasBounds` 플래그 도입 (`width>0 && height>0` 체크), `Initialize` 에서 `_bounds/_session/_killLineReported/_mode` 명시적 리셋 (풀 재사용 시 이전 cast 의 bounds 가 누설되지 않도록). 기존 `BallSession` 경로는 AttachContext 가 valid bounds 로 호출되어 `_hasBounds=true` → 동작 동일.
+- [x] (2026-04-30) Phase 3+4 검증 패널 — `Assets/@Project/Scripts/Game/Spell/Debug/SROptions.Spell.cs`. `public partial class SROptions` (no namespace) 추가. Spell 카테고리: HitInstanceId/BaseDamage/MultiShot/Spread/Bounce/Pierce/Aim/MoveSpeed/LifeTime 노브 + Heavy/Light/DmgUp/InfinitePierce 모디파이어 토글 + OnHit 트리거 토글 + Weapon castsPerTurn/cooldownTurns. 버튼: `CastDirect` (SpellSequence 직접), `CastViaWeapon` (Weapon.Cast — 쿨다운 다음 Cast 시 자동 skip 검증), `ResetSpellOptions`. SpecHitInstance/SpecModifier/SpecTrigger/SpecEffect 인스턴스를 코드에서 즉석으로 생성 — SpecData 시트 채움 미완 상태에서도 동작. 사용자가 SRDebugger (StompyRobot) 설치 (2026-04-30, source 형태로 `Assets/StompyRobot/`).
+- [x] (2026-04-30) Phase 4 — `Spell` + `Weapon` 런타임. `Assets/@Project/Scripts/Game/Spell/Spell.cs` + `Weapon.cs`. `Spell` discriminated union (Projectile/Modifier/Trigger/Effect 4종 factory + `FitsSlot`). `Weapon` (`SpecWeapon spec`, `Spell?[] slots`, `int cooldownLeft`): `TryEquipSpell` (slotShape 호환 + null 슬롯 클리어), `Cast(from, origin, IReadOnlyList<float> angles)` — `castsPerTurn` 만큼 SpellSequence 빌드 + `cooldownTurns` 적용 + 쿨다운 자동 decrement, `SwapTo(newSpec, overflow)` first-fit migration, `CanCast` (첫 PROJECTILE 슬롯 검사). `ExtractSlots` 매 캐스트당 새 List — TriggerWatcher 가 effects 리스트를 hit 수명 동안 보유하므로 정적 버퍼 alias 위험 회피.
 - [x] (2026-04-30) Phase 3 — `SnapshotPatch` 구현. `Assets/@Project/Scripts/Game/Spell/SnapshotPatch.cs` (Spell.md §3 / §7.1 권위표 그대로). `Apply(SpecModifier)` 누적 + `ApplyTo(HitSnapshot, SpecHitInstance)` 적용. `Mul`이 0이면 identity로 처리 (xlsx empty cell 방어). Editor verifier 추가 (`Tools > ChainBall > Spell > Verify SnapshotPatch`) — 강화탄+경량탄+데미지업 → damage=3 / bounce=7.
 - [x] (2026-04-30) Phase 3 — `SpellSequence` 통합. `Assets/@Project/Scripts/Game/Spell/SpellSequence.cs`. `Initialize` + `Use(from, origin, dir)`: SnapshotPatch 빌드 → multiShot (+ CLONE_AT_FIRE) cap 64 → spread 분배 → `Handlers.Pool.Get<MovingHit>` + `HitSnapshotBuilder.Build` + `patch.ApplyTo` + `Initialize` → bounce/pierce delta 반영 + PIERCE_ON_HIT → TriggerWatcher 부착. `Dispose` 시 watcher 일괄 정리. `HitInstanceDamageSpec` adapter (SpecHitInstance → IDamageSpec, damageType/attackType `default`). TriggerWatcher 는 OnDespawn 끝에서 self-Dispose 추가 — 풀 재활용 시 핸들러 leak 방지.
 - [x] (2026-04-30) Phase 3 — `TriggerWatcher` 구현. `Assets/@Project/Scripts/Game/Spell/TriggerWatcher.cs`. HitInstance.OnHit/OnDespawn 구독 → `eTriggerEvent` 매칭 (BRICK_HIT/BRICK_KILL/PROJECTILE_DESPAWN/NTH_BRICK_HIT/ELEMENT_MATCH/CONSECUTIVE_HIT 6종) → `EffectFactory.Create` + `host.Data.Effects.Add`. cooldownTurn / maxFiresPerCast 가드. WALL_BOUNCE/LINE_CLEAR/DANGER_PROXIMITY/FULL_BOUNCE 는 Phase 7 ChainBall event bus 도입 후.
