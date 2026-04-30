@@ -1,8 +1,11 @@
+using System;
 using Library;
 using UnityEngine;
 
 public class BounceMovement : ProjectileMovement
 {
+    public event Action OnBounced;
+
     private enum Mode { Bounce, AbsorbToPlayer }
 
     [SerializeField] private float _speed    = 15f;
@@ -51,6 +54,20 @@ public class BounceMovement : ProjectileMovement
         _killLineReported = false;
     }
 
+    // Copy wall-bounce context from another BounceMovement instance. Used when a
+    // child projectile must inherit the parent's bounds/killLine wiring without
+    // re-routing through the original source (SRDebugger, BallSession, etc.).
+    // Session is intentionally NOT copied — child despawn must not re-trigger the
+    // parent's BallSession.OnBallReachedKillLine path.
+    public void CopyBoundsFrom(BounceMovement source)
+    {
+        if (source == null) return;
+        _bounds    = source._bounds;
+        _hasBounds = source._hasBounds;
+        _killLineY = source._killLineY;
+        _killLineReported = false;
+    }
+
     public void EnterAbsorbMode(Vector2 playerPos)
     {
         _mode = Mode.AbsorbToPlayer;
@@ -62,6 +79,27 @@ public class BounceMovement : ProjectileMovement
     public void SetPierceCount(int count)
     {
         _pierceLeft = Mathf.Max(0, count);
+    }
+
+    // Seed the pierced-recently list externally — used by SpawnOnHitBehavior so a
+    // freshly-spawned child projectile doesn't re-hit the parent's just-hit unit
+    // while still overlapping its collider.
+    public void IgnoreColliderForFrames(Collider2D c, int frames)
+    {
+        if (c == null || frames <= 0) return;
+        int slot = -1;
+        int oldestFramesLeft = int.MaxValue;
+        for (int i = 0; i < _piercedRecently.Length; i++)
+        {
+            if (_piercedRecently[i].Collider == c) { slot = i; break; }
+            if (_piercedRecently[i].Collider == null) { slot = i; break; }
+            if (_piercedRecently[i].FramesLeft < oldestFramesLeft)
+            {
+                oldestFramesLeft = _piercedRecently[i].FramesLeft;
+                slot = i;
+            }
+        }
+        _piercedRecently[slot] = new PierceMark { Collider = c, FramesLeft = frames };
     }
 
     public override void Initialize(MovingHit projectile, Vector3 direction)
@@ -209,6 +247,7 @@ public class BounceMovement : ProjectileMovement
             break;
         }
 
+        if (reflected) OnBounced?.Invoke();
         if (!reflected) pos += _dir * step;
 
         // Wall reflection (Rect — prototype walls are not colliders).
@@ -217,9 +256,11 @@ public class BounceMovement : ProjectileMovement
         // down on the first frame.
         if (_hasBounds)
         {
-            if (pos.x < _bounds.xMin)      { pos.x = _bounds.xMin; _dir = Vector2.Reflect(_dir, Vector2.right); }
-            else if (pos.x > _bounds.xMax) { pos.x = _bounds.xMax; _dir = Vector2.Reflect(_dir, Vector2.left); }
-            if (pos.y > _bounds.yMax)      { pos.y = _bounds.yMax; _dir = Vector2.Reflect(_dir, Vector2.down); }
+            bool wallHit = false;
+            if (pos.x < _bounds.xMin)      { pos.x = _bounds.xMin; _dir = Vector2.Reflect(_dir, Vector2.right); wallHit = true; }
+            else if (pos.x > _bounds.xMax) { pos.x = _bounds.xMax; _dir = Vector2.Reflect(_dir, Vector2.left);  wallHit = true; }
+            if (pos.y > _bounds.yMax)      { pos.y = _bounds.yMax; _dir = Vector2.Reflect(_dir, Vector2.down);  wallHit = true; }
+            if (wallHit) OnBounced?.Invoke();
         }
 
         transform.position = pos;
@@ -231,6 +272,15 @@ public class BounceMovement : ProjectileMovement
             _killLineReported = true;
             _session?.OnBallReachedKillLine(_projectile, pos);
         }
+    }
+
+    public override Vector2 GetVelocityDirection() => _dir;
+
+    public override void SetVelocityDirection(Vector2 direction)
+    {
+        if (direction.sqrMagnitude < 0.0001f) return;
+        _dir = direction.normalized;
+        SetRotationFromDirection(_dir);
     }
 
     private void TickAbsorb(float deltaTime)

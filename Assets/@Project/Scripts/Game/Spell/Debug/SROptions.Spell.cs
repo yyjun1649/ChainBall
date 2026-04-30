@@ -176,6 +176,97 @@ public partial class SROptions
             fired, _spellAimAngleDeg));
     }
 
+    [Category(CategorySpell), DisplayName("Cast: Homing")]
+    public void CastHoming()
+    {
+        if (!TryResolveAttacker(out var attacker, out var origin)) return;
+
+        var target = FindNearestEnemy(attacker, origin);
+        if (target == null)
+        {
+            Debug.LogWarning("[SROptions.Spell] CastHoming: no enemy found.");
+            return;
+        }
+
+        var (proj, mods, trig, effs) = BuildSpecBundle();
+        Vector3 direction = UtilCode.AngleToVector(_spellAimAngleDeg);
+
+        var sequence = SpellSequence.Get();
+        sequence.Initialize(proj, mods, trig, effs);
+        int fired = sequence.Use(attacker, origin, direction, hit =>
+        {
+            MaybeAttachBounceContext(hit);
+            hit?.AddBehavior(new HomingBehavior(target, turnRate: 360f));
+        });
+        sequence.Dispose();
+        Debug.Log(ZString.Format(
+            "[SROptions.Spell] CastHoming fired {0} projectile(s) toward {1}.",
+            fired, target.name));
+    }
+
+    [Category(CategorySpell), DisplayName("Cast: LightningChain")]
+    public void CastLightningChain()
+    {
+        if (!TryResolveAttacker(out var attacker, out var origin)) return;
+
+        var (proj, mods, trig, effs) = BuildSpecBundle();
+        Vector3 direction = UtilCode.AngleToVector(_spellAimAngleDeg);
+
+        var sequence = SpellSequence.Get();
+        sequence.Initialize(proj, mods, trig, effs);
+        int fired = sequence.Use(attacker, origin, direction, hit =>
+        {
+            MaybeAttachBounceContext(hit);
+            hit?.AddBehavior(new LightningChainBehavior(chainCount: 3, damage: 5f));
+        });
+        sequence.Dispose();
+        Debug.Log(ZString.Format(
+            "[SROptions.Spell] CastLightningChain fired {0} projectile(s) at {1:0.#}°.",
+            fired, _spellAimAngleDeg));
+    }
+
+    [Category(CategorySpell), DisplayName("Cast: SpawnOnHit")]
+    public void CastSpawnOnHit()
+    {
+        if (!TryResolveAttacker(out var attacker, out var origin)) return;
+
+        var (proj, mods, trig, effs) = BuildSpecBundle();
+        Vector3 direction = UtilCode.AngleToVector(_spellAimAngleDeg);
+
+        var sequence = SpellSequence.Get();
+        sequence.Initialize(proj, mods, trig, effs);
+        int fired = sequence.Use(attacker, origin, direction, hit =>
+        {
+            MaybeAttachBounceContext(hit);
+            hit?.AddBehavior(new SpawnOnHitBehavior(count: 3, hitInstanceId: 1, spreadAngleDeg: 60f));
+        });
+        sequence.Dispose();
+        Debug.Log(ZString.Format(
+            "[SROptions.Spell] CastSpawnOnHit fired {0} projectile(s) at {1:0.#}°.",
+            fired, _spellAimAngleDeg));
+    }
+
+    [Category(CategorySpell), DisplayName("Cast: BonusDamage")]
+    public void CastBonusDamage()
+    {
+        if (!TryResolveAttacker(out var attacker, out var origin)) return;
+
+        var (proj, mods, trig, effs) = BuildSpecBundle();
+        Vector3 direction = UtilCode.AngleToVector(_spellAimAngleDeg);
+
+        var sequence = SpellSequence.Get();
+        sequence.Initialize(proj, mods, trig, effs);
+        int fired = sequence.Use(attacker, origin, direction, hit =>
+        {
+            MaybeAttachBounceContext(hit);
+            hit?.AddBehavior(new BonusDamageBehavior(count: 3, damage: 2f, interval: 0.3f));
+        });
+        sequence.Dispose();
+        Debug.Log(ZString.Format(
+            "[SROptions.Spell] CastBonusDamage fired {0} projectile(s) at {1:0.#}°.",
+            fired, _spellAimAngleDeg));
+    }
+
     [Category(CategorySpell)]
     public void CastViaWeapon()
     {
@@ -229,6 +320,23 @@ public partial class SROptions
         }
         origin = attacker.transform.position;
         return true;
+    }
+
+    // Picks the closest alive non-attacker UnitController to `origin`. Used by the
+    // homing debug buttons; intentionally simple (FindObjectsByType is fine for dev tools).
+    private static UnitController FindNearestEnemy(UnitController attacker, Vector3 origin)
+    {
+        var all = UnityEngine.Object.FindObjectsByType<UnitController>(FindObjectsSortMode.None);
+        UnitController best = null;
+        float bestSqr = float.PositiveInfinity;
+        for (int i = 0; i < all.Length; i++)
+        {
+            var u = all[i];
+            if (u == null || u == attacker || !u.IsAlive) continue;
+            float sqr = ((Vector2)(u.transform.position - origin)).sqrMagnitude;
+            if (sqr < bestSqr) { bestSqr = sqr; best = u; }
+        }
+        return best;
     }
 
     private (SpecHitInstance, IReadOnlyList<SpecModifier>, SpecTrigger, IReadOnlyList<SpecEffect>) BuildSpecBundle()

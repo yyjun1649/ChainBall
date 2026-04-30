@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Text;
 using Library;
@@ -20,11 +22,97 @@ public class UnitSpawnHandler : GameHandler
     private int _cursor;
     private string _currentWaveId;
 
+    private readonly List<UnitController> _activeUnits = new();
+
     public string CurrentWaveId  => _currentWaveId;
     public bool   HasNext        => _wave != null && _cursor < _wave.Length;
     public int    RemainingLines => _wave == null ? 0 : Mathf.Max(0, _wave.Length - _cursor);
+    public IReadOnlyList<UnitController> ActiveUnits => _activeUnits;
 
     public override void Initialize() { }
+
+    // Closest hostile alive unit (per attacker's EnemyLayer). Replaces FindObjectsByType scans
+    // on hot paths like HomingBehavior retarget. self-skip + IsAlive recheck guards against
+    // pooled-but-not-yet-released or dying instances still sitting in the active list.
+    public UnitController GetNearestEnemy(Vector3 origin, UnitController self)
+    {
+        if (self == null) return null;
+        int enemyMask = self.EnemyLayer.value;
+
+        UnitController best = null;
+        float bestSqr = float.PositiveInfinity;
+        for (int i = 0; i < _activeUnits.Count; i++)
+        {
+            var u = _activeUnits[i];
+            if (u == null || u == self || !u.IsAlive) continue;
+            if ((enemyMask & (1 << u.gameObject.layer)) == 0) continue;
+            float sqr = ((Vector2)(u.transform.position - origin)).sqrMagnitude;
+            if (sqr < bestSqr) { bestSqr = sqr; best = u; }
+        }
+        return best;
+    }
+
+    // N closest hostile alive units (per attacker's EnemyLayer) excluding `self` and `exclude`.
+    // Caller supplies `results` buffer (cleared on entry) so hot paths (chain behaviors) can
+    // reuse a single list across hits with zero per-call alloc. O(active * count) selection
+    // beats a full sort for the small-N case (chain count typically <= 8).
+    public void GetNearestEnemies(Vector3 origin, UnitController self, UnitController exclude, int count, List<UnitController> results)
+    {
+        if (results == null) return;
+        results.Clear();
+        if (self == null || count <= 0) return;
+        int enemyMask = self.EnemyLayer.value;
+
+        // Parallel arrays: results[k] / bestSqr[k] kept ordered ascending by distance.
+        // Stack-buffer for the common small-count path; heap fallback for large requests.
+        Span<float> bestSqr = count <= 32 ? stackalloc float[count] : new float[count];
+        for (int i = 0; i < count; i++) bestSqr[i] = float.PositiveInfinity;
+        int filled = 0;
+
+        for (int i = 0; i < _activeUnits.Count; i++)
+        {
+            var u = _activeUnits[i];
+            if (u == null || u == self || u == exclude || !u.IsAlive) continue;
+            if ((enemyMask & (1 << u.gameObject.layer)) == 0) continue;
+            float sqr = ((Vector2)(u.transform.position - origin)).sqrMagnitude;
+
+            if (sqr >= bestSqr[count - 1]) continue;
+
+            int insertAt = filled; // default: append at the end of the filled range
+            for (int k = 0; k < filled; k++)
+            {
+                if (sqr < bestSqr[k]) { insertAt = k; break; }
+            }
+
+            // Shift tail right by one slot (drops bestSqr[count-1] when full).
+            int shiftEnd = filled < count ? filled : count - 1;
+            for (int k = shiftEnd; k > insertAt; k--) bestSqr[k] = bestSqr[k - 1];
+            bestSqr[insertAt] = sqr;
+
+            if (filled < count)
+            {
+                results.Add(null);
+                filled++;
+            }
+            for (int k = results.Count - 1; k > insertAt; k--) results[k] = results[k - 1];
+            results[insertAt] = u;
+        }
+    }
+
+    private void Register(UnitController unit)
+    {
+        if (unit == null) return;
+        if (_activeUnits.Contains(unit)) return;
+        _activeUnits.Add(unit);
+        unit.OnReleased += HandleUnitReleased;
+    }
+
+    private void HandleUnitReleased(UnitController unit)
+    {
+        if (unit == null) return;
+        unit.OnReleased -= HandleUnitReleased;
+        _activeUnits.Remove(unit);
+    }
 
     public void LoadWave(string waveId)
     {
@@ -62,6 +150,13 @@ public class UnitSpawnHandler : GameHandler
         _wave = null;
         _cursor = 0;
         _currentWaveId = null;
+
+        for (int i = 0; i < _activeUnits.Count; i++)
+        {
+            var u = _activeUnits[i];
+            if (u != null) u.OnReleased -= HandleUnitReleased;
+        }
+        _activeUnits.Clear();
     }
 
     // Brick / Boss path — Field calls this per parsed cell. Routes through SpecEnemy.
@@ -128,6 +223,8 @@ public class UnitSpawnHandler : GameHandler
 
         var view = Handlers.Pool.Get<UnitView>(viewId);
         view.Initialize(unit);
+
+        Register(unit);
 
         return unit;
     }

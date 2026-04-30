@@ -3,7 +3,7 @@
 > Solo kanban. 우선순위 = 위→아래. **Active ≤ 3** 유지.
 > 큰 그림은 `Docs/Roadmap.md`. 이 파일은 그 중 **지금 작업 중인 슬라이스**.
 >
-> **Current Phase**: Phase 4 — Weapon runtime + 슬롯 평가 (1~2일)
+> **Current Phase**: Phase 6 — Effect 도메인 구현 (3~4일)
 
 ---
 
@@ -11,13 +11,19 @@
 
 <!-- 지금 손대고 있는 것. 시작하면 Backlog → Active 로 이동. -->
 
-<!-- Phase 3 + Phase 4 코드 5종 + SRDebugger 검증 패널 완료. 다음 후보: ① 실 GameScene 에서 SRDebugger 패널 동작 확인 (Addressable HitInstance_1 등록 여부 확인) → ② Phase 5 진입 (Modifier behavior 보강 — Chain/Orbit/Falling/Homing 실구현). -->
-
-- [ ] Phase 3+4 in-scene 검증 — GameScene 진입 → SRDebugger 트리거 → Spell 카테고리에서 CastDirect / CastViaWeapon 버튼 동작 확인. Addressable `HitInstance_1` 등록 여부 사전 점검.
+- [ ] Phase 6 — `EffectFactory.Initialize` 골격 + `HEAL` kind 첫 등록. Stub `EffectFactory.Initialize()` 채우기 (`eEffectKind` → creator dispatch dict). `HealEffect : IEffect` 신규 — `SpecEffect.healAmount` 만큼 `Player.HP += amount`. `Schema/effect.md` 의 `HEAL` 행 권위. SROptions 에 `Trigger HEAL` 검증 버튼 (Player HP 직접 회복). 다음 kind (`DAMAGE_DIRECT`, `STATUS_BURN`, …) 는 후속 PR.
 
 ---
 
 ## Backlog
+
+### Phase 6 — Effect 도메인 구현 (Roadmap §Phase 6)
+
+<!-- 권장 PR 단위: EffectFactory creator 등록 + IEffect 구현 + schema 행 (Roadmap §작업 단위 권장) -->
+<!-- 진행 순서: 의존성 적은 것부터. HEAL (Player.HP만) → GOLD_GAIN (RunState 의존, Phase 9 와이어링 후) → DAMAGE_DIRECT/AOE_DAMAGE/LINE_DAMAGE/CHAIN_DAMAGE (HitLauncher.FireProjectile + InstantHit + Shape) → STATUS_BURN (BurnEffect : IDurationEffect, ITickEffect) → STATUS_FREEZE (FreezeEffect, BrickField.ShiftAllDown 게이트) → SPAWN_HIT_INSTANCE → EXTRA_CAST → OVERKILL_TRANSFER / HALF_HP_REMOVE / GRAVITY_PULL / BURN_DETONATE / EMPOWER_NEXT. -->
+
+- [ ] **(보류)** `UnitData` 마이그레이션 — SpecCharacter 시트화로 깨진 코드 복구. ChainBall Player 구조 결정 (UnitController 파생 여부, stat 사용 여부 등). Phase 8 에서 Player Unit 본격 도입 시 처리.
+- [ ] `Effects.Tick(dt)` 흐름 in-scene 검증 — 화상 벽돌이 매 턴 데미지 받음 (Phase 2 TurnRunner.UPKEEP 와 연결).
 
 ### Phase 3 — SpellSequence (Roadmap §Phase 3)
 
@@ -34,8 +40,6 @@
 <!-- 진행 순서: 의존 적은 것부터. SpecEffect는 Phase 6(EffectFactory 재구현)과 묶여 보류. -->
 
 <!-- SpecEffect / SpecCharacter 마이그레이션 후속 작업 -->
-- [ ] **(Phase 6)** `EffectFactory` + `DamageActionBase` 마이그레이션 — SpecEffect 시트화로 깨진 코드 복구. `eEffectKind` 별 creator dispatch. `Schema/effect.md` 권위.
-- [ ] **(Phase 8)** `UnitData` 마이그레이션 — SpecCharacter 시트화로 깨진 코드 복구. ChainBall Player 구조 결정 (UnitController 파생 여부, stat 사용 여부 등).
 - [ ] `SpecLocalize`에 모든 nameKey/descKey 등록
 - [ ] **검증**: `Tools > SpecData > Rebuild All` 무에러 + `SpecDataValidator` Console 빨간 로그 0
 - [ ] **검증**: 런타임에서 `SpecDataManager.SpecHitInstance.Get(...)` 호출 시 데이터 반환 확인
@@ -47,6 +51,14 @@
 <!-- 최근 완료. 누적되면 `Tasks/Archive/YYYY-MM.md`로 이주. -->
 
 ### 2026-04
+- [x] (2026-04-30) **Phase 5 종료** — Modifier behavior 보강 완료. HomingBehavior / LightningChainBehavior / BonusDamageBehavior / SpawnOnHitBehavior 4종 + UnitSpawnHandler 레지스트리 최적화 (`GetNearestEnemy/GetNearestEnemies` Top-N stackalloc) + Orbit/Falling position-override 카테고리 폐기. → Phase 6 진입.
+- [x] (2026-04-30) Phase 5 — `SpawnOnHitBehavior` 신규 구현 (OnHit 구독 패턴). 검증 완료. count + hitInstanceId + spreadAngleDeg, 부채꼴 fan-out, ChildDamageSpec 어댑터 + parent Snapshot fallback, BounceMovement.CopyBoundsFrom 으로 자식 wall reflect 정합, immediate re-hit 방지 (skinDistance 0.4 + IgnoreColliderForFrames 5).
+- [x] (2026-04-30) Phase 5 — `BonusDamageBehavior` 신규 구현 (OnHit 구독 패턴). 검증 완료. OnHit + OnTickFrame 펄스 큐, target 고정 + Version 게이트, 매 OnHit 누적, count=3/damage=2/interval=0.3 SROptions 하드코딩.
+- [x] (2026-04-30) Dev — SRDebugger Spawn 패널 추가 (BrickType / Column / FilledRow). FieldHandler ShiftAllDown + AddRowFromPattern 우회.
+- [x] (2026-04-30) Phase 5 — `LightningChainBehavior` 신규 구현 (OnHit 구독 패턴). 검증 완료. `GetNearestEnemies` stackalloc Top-N + `DealDamage` 6-layer 진입점, SROptions `Cast: LightningChain` 버튼.
+- [x] (2026-04-30) Phase 5 — `OrbitBehavior` / position-override 구조 폐기 결정. ChainBall 에 부적합 (Orbit/Falling 모두). 관련 코드/marker/가드 제거 (combat-specialist 동시 진행).
+- [x] (2026-04-30) Phase 5 — `HomingBehavior` 보강 완료. Velocity 회전 실구현 (단순 turnRate, U-turn 부스트 없음) + 타깃 사망 시 retarget + bounce pause 0f. `FindObjectsByType` 제거하고 `UnitSpawnHandler.GetNearestEnemy` 레지스트리 경로로 최적화. turnRate=360f 는 SROptions 하드코딩 (정식 SpecData 화는 Phase 11 Content/Balance 시점). SROptions Homing 토글 + 타깃 디버그로 in-scene 검증 통과.
+- [x] (2026-04-30) Phase 3+4 in-scene 검증 — GameScene 진입 → SRDebugger Spell 카테고리 → `CastDirect` 버튼으로 매직볼 발사 동작 확인. Addressable `HitInstance_1` 키 등록 완료. Phase 3 (SpellSequence/SnapshotPatch/TriggerWatcher) + Phase 4 (Weapon) 런타임 라이브 검증 통과. → Phase 5 진입.
 - [x] (2026-04-30) Phase 3+4 zero-alloc 패스 — 사용자 컨벤션 강제: ZString / ZLinq / Pool. `SnapshotPatch` / `TriggerWatcher` / `SpellSequence` / `HitInstanceDamageSpec` 4종을 `Library.DisposeObject<T>` 로 전환 (HitSnapshot/DamageInfo 와 동일 패턴): 정적 `Get()` + `Dispose()` 사이클 + `protected override Reset()`. 모든 `$"..."` 인터폴레이션을 `ZString.Format/Concat` 로 교체 (Cysharp.Text). `SpellSequence.Reset` 은 `_activeWatchers.Clear()` 만 — watcher 들은 자기 HitInstance.OnDespawn 으로 자가-Dispose 하므로 sequence 풀링과 독립. ZLinq 미적용 (LINQ 미사용). ListPool 미적용 (TriggerWatcher 가 effects List 를 hit 수명 동안 보유 → aliasing 위험). Weapon 본체는 long-lived (per-Player 1개) 라 풀 불필요.
 - [x] (2026-04-30) Phase 3+4 코드리뷰 + 최적화 — 3-agent 병렬 리뷰 (reuse / quality / efficiency) 후 픽스: ① `HitSnapshotKeys.HitWidth/Element` 상수화 (SnapshotPatch + TriggerWatcher 의 stringly-typed `Extra` 키 제거) ② TriggerWatcher 에 `_effectIdPrefix` 캐시 — `FireEffects` 의 `$"trig_{id}_{spec.id}"` 매-발화 string alloc 제거 (HIGH) ③ SpellSequence.Use 가 `HitInstanceDamageSpec` 를 캐스트당 1회 hoist (이전: 발사체당 alloc) ④ `UtilCode.AngleToVector` 재사용 — Weapon.FireOnce / SROptions.Spell 의 inline `cos/sin/Deg2Rad` 중복 제거 ⑤ CONSECUTIVE_HIT vs NTH_BRICK_HIT 시맨틱 차이 주석 추가. 스킵: `_hasBounds` 캐시 (hot path 정당), `ApplyPierce` is-check (honest dispatch), List per-Cast (TriggerWatcher 수명 보유).
 - [x] (2026-04-30) ChainBall pierce 시맨틱 구현 (Phase 5 일부 선행). `BounceMovement` 에 `_pierceLeft` + `SetPierceCount(int)` 추가. `TickBounce` 가 `Physics2D.CircleCastNonAlloc` (8-buffer, 거리 정렬) 로 한 step 안의 모든 hit 처리 — 유닛 hit 시 pierce 활성이면 데미지 + decrement + 반사 스킵 + 다음 hit 으로 진행 (벽은 항상 반사). `PierceMark[4]` 무시 리스트 (3프레임 TTL) 로 brick 가 폭이 step 보다 클 때 같은 charge 재소비 방지. `SpellSequence.ApplyPierce` 가 BounceMovement 면 `SetPierceCount`, 아니면 기존 `PenetrateBehavior(N)` 폴백. `PIERCE_ON_HIT` 모디파이어도 동일 분기. SROptions 의 PierceCount/ModInfinitePierce 가 의도대로 "벽돌 통과" 로 작동.

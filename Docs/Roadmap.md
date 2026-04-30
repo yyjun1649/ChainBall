@@ -143,13 +143,13 @@ GDD에서 *추가로* 필요한 것:
 ### 산출물
 - [ ] 신규 `IHitBehavior` 구현:
   - `ChainBehavior(int maxJumps)` — OnHit 시 인접 벽돌로 새 InstantHit/MovingHit spawn.
-  - `OrbitBehavior` (위치 덮어쓰기 — Homing과 금지 조합).
-  - `FallingBehavior` (위치 덮어쓰기).
+  - ~~`OrbitBehavior` (위치 덮어쓰기 — Homing과 금지 조합).~~ **폐기 (2026-04-30)** — position-override 구조 자체가 ChainBall 에 부적합.
+  - ~~`FallingBehavior` (위치 덮어쓰기).~~ **폐기 (2026-04-30)** — 동상.
 - [ ] 기존 scaffold 보강:
   - `HomingBehavior` — Velocity 회전 실제 구현 (Movement 모듈과 협업, S/combat-hit §IHitBehavior 카탈로그 §7.10).
   - `BounceBehavior` — `TryConsume()` 가 Movement collision callback에서 호출되도록 ProjectileMovement와 연결.
 - [ ] Modifier behavior → IHitBehavior 매핑 표 (Spell.md §7.2) 를 코드 `ModifierBehaviorResolver` 에 반영.
-- [ ] 금지 조합 검증 — `SpellSequence.Use` 안에서 동시 부착 시 디버그 경고 + 후자 무시.
+- [ ] ~~금지 조합 검증 — `SpellSequence.Use` 안에서 동시 부착 시 디버그 경고 + 후자 무시.~~ **폐기 (2026-04-30)** — position-override 카테고리 제거로 Velocity-rotate (Homing) vs Position-override 충돌 자체가 사라짐.
 
 ### 검증
 - "Pinball Machine" 빌드 (스파크 + 가속 + 바운스 마스터 + 리코셰) 동작.

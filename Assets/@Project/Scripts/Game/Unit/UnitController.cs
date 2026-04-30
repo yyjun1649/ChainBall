@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Text;
 using Library;
 using Sigtrap.Relays;
@@ -20,12 +21,17 @@ public class UnitController : PoolMonoBehaviour<UnitController>
     public bool IsAlive { get; private set; }
 
     public UnitFsmHandler UnitFsmHandler => _unitFsmHandler;
+    public Collider2D Collider => _collider;
 
     #region Action
 
     public Relay<DamageInfo, UnitController> OnTakeDamage { get; private set; } = new();
     public Relay<DamageInfo, UnitController> OnDealDamage { get; private set; } = new();
     public Relay<bool> OnDeath { get; private set; } = new();
+
+    // Lifecycle hook — fired exactly once per pooled life, on return to pool. Used by
+    // UnitSpawnHandler to drop the unit from its active-unit list.
+    public event Action<UnitController> OnReleased;
 
     public void ClearAction()
     {
@@ -142,6 +148,7 @@ public class UnitController : PoolMonoBehaviour<UnitController>
     {
         MappingHelperManager.Instance.Unit.Unregister(_collider);
         Version++;
+        OnReleased?.Invoke(this);
         base.OnRelease();
     }
 

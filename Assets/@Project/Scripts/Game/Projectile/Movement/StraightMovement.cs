@@ -4,6 +4,7 @@ public class StraightMovement : ProjectileMovement
 {
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifeTime = 5f;
+    // legacy: SpellSequence 미경유 경로용. HomingBehavior 와 동시 사용 금지.
     [SerializeField] private float rotateSpeed = 0f;
 
     private Transform _target;
@@ -56,5 +57,14 @@ public class StraightMovement : ProjectileMovement
     public void SetTarget(Transform target)
     {
         _target = target;
+    }
+
+    public override Vector2 GetVelocityDirection() => _direction;
+
+    public override void SetVelocityDirection(Vector2 direction)
+    {
+        if (direction.sqrMagnitude < 0.0001f) return;
+        _direction = direction.normalized;
+        SetRotationFromDirection(_direction);
     }
 }
